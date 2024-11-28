@@ -1,0 +1,20 @@
+{
+  "table-title": "Best traders",
+  "table-text-name": "Trader Name",
+  "table-text-email": "Email",
+  "table-text-phoneNumber": "Phone Number",
+  "table-text-isActive": "Status",
+  "table-text-totalSales": "Total Sales",
+  "table-text-subdomain": "Subdomain",
+  "table-text-qr": "QR",
+  "text-loading": "Loading...",
+  "table-text-pages": "Pages",
+  "table-text-row-per-page": "Rows per page",
+  "text-custom-best-selling-stores": "Best selling stores",
+  "profits-according-to-geographical-regions": "Profits according to geographical regions",
+  "plan": "Best selling plans",
+  "profits":"Profit",
+  "total-appointment":"Total Appointment",
+  "text-no-data": "No Data"
+}
+ 

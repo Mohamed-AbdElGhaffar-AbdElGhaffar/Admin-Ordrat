@@ -1,0 +1,20 @@
+{
+    "table-title": "افضل التجار",
+    "table-text-name": "اسم التاجر",
+    "table-text-email": "البريد الالكتروني",
+    "table-text-phoneNumber": "رقم الهاتف",
+    "table-text-totalSales": "اجمالي الربح",
+    "table-text-isActive": "الحالة",
+    "table-text-subdomain": "رابط المتجر",
+    "table-text-qr": "QR",
+    "text-loading": "...تحميل",
+    "table-text-pages": "عدد الصفح",
+    "table-text-row-per-page": "عدد الصفوف لكل صفحة",
+    "text-custom-best-selling-stores": "المتاجرالاكثر مبيعا",
+    "profits-according-to-geographical-regions": "الارباح حسب المناطق الجغرافيه",
+    "plan": "الخطط الاكثر مبيعا",
+    "profits":"الارباح",
+    "total-appointment":"Total Appointment",
+    "table-text-no-data": "لايوجد بيانات"
+  }
+  
