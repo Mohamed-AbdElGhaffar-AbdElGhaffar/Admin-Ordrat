@@ -78,7 +78,7 @@ export const getColumns = ({
     dataIndex: "modified",
     key: "modified",
     width: 150,
-    render: (value: Date) => <DateCell date={value} />,
+    render: (value: Date) => <DateCell date={value} lang='en' />,
   },
   {
     title: <HeaderCell title="table-text-shared" />,

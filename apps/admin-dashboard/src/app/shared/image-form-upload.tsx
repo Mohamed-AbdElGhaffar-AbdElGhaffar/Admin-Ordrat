@@ -32,7 +32,9 @@ export default function FileUpload({
   accept = 'all',
   lang = 'lang',
   onFileChange,
+  onFilesChange,
   onFileDelete,
+  initialImage,
 }: {
   label?: string;
   lang?: string;
@@ -42,7 +44,9 @@ export default function FileUpload({
   multipleFiles?: boolean;
   accept?: AcceptedFiles;
   onFileChange?: (file: File | null) => void;
+  onFilesChange?: (file: File[] | null) => void;
   onFileDelete?: () => void;
+  initialImage?: string;
 }) {
   const { closeModal } = useModal();
 
@@ -70,7 +74,9 @@ export default function FileUpload({
         btnLabel={btnLabel}
         lang={lang}
         onFileChange={onFileChange}
+        onFilesChange={onFilesChange}
         onFileDelete={onFileDelete}
+        initialImage={initialImage}
       />
     </div>
   );
@@ -95,7 +101,9 @@ export const FileInput = ({
   className,
   lang,
   onFileChange,
+  onFilesChange,
   onFileDelete,
+  initialImage,
 }: {
   className?: string;
   label?: React.ReactNode;
@@ -105,7 +113,9 @@ export const FileInput = ({
   accept?: AcceptedFiles;
   lang?: string;
   onFileChange?: (file: File | null) => void;
+  onFilesChange?: (file: File[] | null) => void;
   onFileDelete?: () => void;
+  initialImage?: string;
 }) => {
   const { closeModal } = useModal();
   const [files, setFiles] = useState<Array<File>>([]);
@@ -129,7 +139,7 @@ export const FileInput = ({
     // Invoke onFileChange with the first file if multipleFiles is false
     if (multipleFiles) {
       setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-      if (onFileChange) onFileChange(newFiles[0] || null);
+      if (onFilesChange) onFilesChange(newFiles[0] || null);
     } else {
       const singleFile = newFiles[0] || null;
       setFiles(newFiles);
@@ -166,10 +176,12 @@ export const FileInput = ({
         label={label}
         ref={imageRef}
         accept={accept}
-        multiple={multiple}
+        multiple={fileData}
+        multipleFiles={multipleFiles}
         lang={lang}
         onChange={(event) => handleFileDrop(event)}
         className={`${fileData? 'mb-6' : '' } min-h-[280px] justify-center border-dashed bg-gray-50 dark:bg-transparent`}
+        initialImage={initialImage}
       />
 
       {files.length > 1 ? (

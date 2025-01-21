@@ -12,6 +12,7 @@ import cn from "@utils/class-names";
 import { dir } from "i18next";
 import { languages } from "../i18n/settings";
 import { FileProvider } from "../components/context/FileContext";
+import { GuardProvider } from "../components/context/GuardContext";
 
 const NextProgress = dynamic(() => import("@components/next-progress"), {
   ssr: false,
@@ -46,13 +47,15 @@ export default async function RootLayout({
       >
         <AuthProvider session={session}>
           <ThemeProvider>
-            <FileProvider>
-              <NextProgress />
-              {children}
-              <Toaster />
-              <GlobalDrawer lang={lang} />
-              <GlobalModal />
-            </FileProvider>
+            <GuardProvider>
+              <FileProvider>
+                <NextProgress />
+                {children}
+                <Toaster />
+                <GlobalDrawer lang={lang} />
+                <GlobalModal />
+              </FileProvider>
+            </GuardProvider>
           </ThemeProvider>
         </AuthProvider>
       </body>

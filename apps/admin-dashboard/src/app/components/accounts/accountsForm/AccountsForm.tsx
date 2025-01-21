@@ -1,8 +1,8 @@
 'use client';
 
 import { PiXBold, PiPlusBold, PiMinusBold } from 'react-icons/pi';
-import React, { useState } from 'react';
-import { ActionIcon, Title, Button, Input, Textarea } from 'rizzui';
+import React, { useEffect, useState } from 'react';
+import { ActionIcon, Title, Button, Input, Password } from 'rizzui';
 import ReactSelect from 'react-select';
 import { useModal } from '@/app/shared/modal-views/use-modal';
 import toast from 'react-hot-toast';
@@ -10,10 +10,22 @@ import styles from './AccountsForm.module.css';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { API_BASE_URL } from '@/config/base-url';
+import axiosClient from '../../context/api';
+import { Loader } from 'lucide-react';
 
-type Feature = {
-  title: string;
-  description: string;
+type Group = {
+  id: string;
+  name: string;
+};
+
+type NewGroup = {
+  nameEn: string;
+  nameAr: string;
+  roles: { roleId:string; }[];
+};
+type NewRole = {
+  nameEn: string;
+  nameAr: string;
 };
 
 type AccountsFormProps = {
@@ -30,19 +42,56 @@ export default function AccountsForm({
   lang = 'en',
 }: AccountsFormProps) {
   const { closeModal } = useModal();
-  const [selectedFeatures, setSelectedFeatures] = useState<Feature[]>([]);
-  const [dynamicOptions, setDynamicOptions] = useState([
-    { value: 'feature1', label: lang === 'ar' ? 'ميزة 1' : 'Feature 1' },
-    { value: 'feature2', label: lang === 'ar' ? 'ميزة 2' : 'Feature 2' },
-  ]);
+  const [selectedGroups, setSelectedGroups] = useState<Group[]>([]);
+  const [dynamicOptions, setDynamicOptions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [newGroup, setNewGroup] = useState<NewGroup>({
+    nameAr: '',
+    nameEn: '',
+    roles: [],
+  });
+  const [newRole, setNewRole] = useState<NewRole>({
+    nameAr: '',
+    nameEn: '',
+  });
+  const [selectedRoles, setSelectedRoles] = useState<Group[]>([]);
+  
+  const [dynamicRoleOptions, setDynamicRoleOptions] = useState([]);
+  const [role, setRole] = useState(true);
+  const [newGroupError, setNewGroupError] = useState({
+    nameAr: '',
+    nameEn: '',
+    roles: '',
+  });
+  const [newRoleError, setNewRoleError] = useState({
+    nameAr: '',
+    nameEn: '',
+  });
 
   const text = {
     firstName: lang === 'ar' ? 'الاسم الأول' : 'First Name',
     lastName: lang === 'ar' ? 'الاسم الأخير' : 'Last Name',
     phoneNumber: lang === 'ar' ? 'رقم الهاتف' : 'Phone Number',
     email: lang === 'ar' ? 'البريد الالكتروني' : 'Email',
-    selectPermissions: lang === 'ar' ? 'اختيار صلاحية' : 'Select Permissions',
+    password: lang === 'ar' ? 'كلمة المرور' : 'Password',
+    selectPermissions: lang === 'ar' ? 'اختيار جروب الصلاحيات' : 'Select Permissions Groups',
+
     submit: lang === 'ar' ? 'إضافة مساعد المسؤول' : 'Add Admin Assestant',
+
+    addGroup: lang === 'ar' ? 'إضافة مجموعة جديدة' : 'Add New Group',
+    addRole: lang === 'ar' ? 'إضافة صلاحية جديدة' : 'Add New Role',
+
+    newGroupAr: lang === 'ar' ? 'اسم المجموعة (عربي)' : 'Group Name (Arabic)',
+    newGroupEn: lang === 'ar' ? 'اسم المجموعة (إنجليزي)' : 'Group Name (English)',
+    role: lang === 'ar' ? 'صلاحيات المجموعة' : 'Group Role',
+
+    newRoleAr: lang === 'ar' ? 'اسم الصلاحية (عربي)' : 'Role Name (Arabic)',
+    newRoleEn: lang === 'ar' ? 'اسم الصلاحية (إنجليزي)' : 'Role Name (English)',
+
+    add: lang === 'ar' ? 'اضافة' : 'Add',
+    clear: lang === 'ar' ? 'تفريغ' : 'Clear',
   };
 
   const requiredMessage = lang === 'ar' ? 'مطلوب' : 'is required';
@@ -56,7 +105,16 @@ export default function AccountsForm({
     email: Yup.string()
       .required(`${text.email} ${requiredMessage}`)
       .email(lang === 'ar' ? 'البريد الإلكتروني غير صالح' : 'Invalid email address'),
-    // permissions: Yup.array().min(1, text.selectPermissions + ' ' + requiredMessage),
+    password: Yup.string()
+      .required(`${text.password} ${requiredMessage}`)
+      .min(8, lang === 'ar' ? 'يجب أن تكون كلمة المرور 8 أحرف على الأقل' : 'Password must be at least 8 characters')
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
+        lang === 'ar'
+          ? 'يجب أن تحتوي كلمة المرور على حرف كبير وحرف صغير ورقم ورمز'
+          : 'Password must contain an uppercase letter, lowercase letter, number, and special character'
+      ),
+    permissions: Yup.array().min(1, text.selectPermissions + ' ' + requiredMessage),
   });
 
   const mainFormik = useFormik({
@@ -65,39 +123,166 @@ export default function AccountsForm({
       lastName: '',
       phoneNumber: '',
       email: '',
-      // permissions: [],
+      password: '',
+      permissions: [],
     },
     validationSchema: mainFormSchema,
     onSubmit: async (values) => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/Support/Create`, {
-          method: 'POST',
+        const requestBody = {
+          email: values.email,
+          phoneNumber: values.phoneNumber,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          password: values.password,
+          groups: values.permissions.map((permission: any) => permission.id),
+        };
+        const response = await axiosClient.post('/api/Support/Create', requestBody, {
           headers: {
             'Accept-Language': lang,
-            'Content-Type': 'application/json',
           },
-          body: JSON.stringify(values),
         });
 
-        if (response.ok) {
-          const result = await response.json();
-          toast.success(result.message || (lang === 'ar' ? 'تم الإضافة بنجاح!' : 'Support created successfully!'));
+        if (response.status === 200) {
+          toast.success(lang === 'ar' ? 'تم الإضافة بنجاح!' : 'Support created successfully!');
           if (onSuccess) onSuccess();
           closeModal();
         } else {
-          const errorText = await response.text();
-          toast.error(
-            lang === 'ar'
-              ? `فشل في الإضافة: ${errorText}`
-              : `Failed to create support: ${errorText}`
-          );
+          toast.error(lang === 'ar' ? 'فشل في الإضافة' : 'Failed to create support');
         }
       } catch (error) {
-        console.error('Error creating support:', error);
+        console.error('Error:', error);
         toast.error(lang === 'ar' ? 'حدث خطأ أثناء الإضافة' : 'An error occurred while creating support');
       }
     },
   });
+
+  const validateNewGroupInputs = () => {
+    const errors = { nameAr: '', nameEn: '', roles:'' };
+    let isValid = true;
+
+    if (!newGroup.nameAr) {
+      errors.nameAr = text.newGroupAr + ' ' + requiredMessage;
+      isValid = false;
+    }
+    if (!newGroup.nameEn) {
+      errors.nameEn = text.newGroupEn + ' ' + requiredMessage;
+      isValid = false;
+    }
+    if (newGroup.roles.length == 0 && !role) {
+      errors.roles = text.role + ' ' + requiredMessage;
+      isValid = false;
+    }
+
+    setNewGroupError(errors);
+    return isValid;
+  };
+
+  const validateNewRoleInputs = () => {
+    const errors = { nameAr: '', nameEn: '' };
+    let isValid = true;
+
+    if (!newRole.nameAr) {
+      errors.nameAr = text.newRoleAr + ' ' + requiredMessage;
+      isValid = false;
+    }
+    if (!newRole.nameEn) {
+      errors.nameEn = text.newRoleEn + ' ' + requiredMessage;
+      isValid = false;
+    }
+
+    setNewRoleError(errors);
+    return isValid;
+  };
+
+  // Fetch dynamic options
+  const fetchGroups = async () => {
+    try {
+      const { data } = await axiosClient.get('/api/Group/GetAll', {
+        headers: {
+          'Accept-Language': lang,
+        },
+      });
+      const options = data.map((group: { id: any; name: any; }) => ({ value: group.id, label: group.name }));
+      setDynamicOptions(options);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching groups:', error);
+      toast.error(lang === 'ar' ? 'خطأ في تحميل الصلاحيات' : 'Error fetching permissions');
+      setLoading(false);
+    }
+  };
+
+  // Fetch dynamic options for Roles
+  const fetchRoles = async () => {
+    try {
+      const { data } = await axiosClient.get('/api/Role/GetAll', {
+        headers: {
+          'Accept-Language': lang,
+        },
+      });
+      const options = data.map((role: { id: any; name: any; }) => ({ value: role.id, label: role.name }));
+      setDynamicRoleOptions(options);
+    } catch (error) {
+      console.error('Error fetching groups:', error);
+      toast.error(lang === 'ar' ? 'خطأ في تحميل صلاحيات الجروب' : 'Error fetching role permissions');
+    }
+  };
+
+  const createGroup = async () => {
+    if (validateNewGroupInputs()) {      
+      try {
+        const response = await axiosClient.post('/api/Group/Create', newGroup);
+
+        if (response.status === 200) {
+          toast.success(lang === 'ar' ? 'تم إنشاء المجموعة بنجاح!' : 'Group created successfully!');
+          setNewGroup({ nameAr: '', nameEn: '', roles: [], });
+          setSelectedRoles([]);
+          setRole(true);
+          setIsGroupModalOpen(false);
+          fetchGroups();
+        } else {
+          toast.error(lang === 'ar' ? 'فشل في إنشاء المجموعة' : 'Failed to create group');
+        }
+      } catch (error) {
+        console.error('Error creating group:', error);
+        toast.error(lang === 'ar' ? 'حدث خطأ أثناء إنشاء المجموعة' : 'An error occurred while creating the group');
+      }
+    }
+  };
+
+  const createRole = async () => {
+    if (validateNewRoleInputs()) {      
+      try {
+        const response = await axiosClient.post('/api/Role/Create', newRole);
+
+        if (response.status === 200) {
+          toast.success(lang === 'ar' ? 'تم إنشاء الصلاحية بنجاح!' : 'Role created successfully!');
+          setNewRole({ nameAr: '', nameEn: '' });
+          setIsRoleModalOpen(false);
+          fetchRoles();
+        } else {
+          toast.error(lang === 'ar' ? 'فشل في إنشاء الصلاحية' : 'Failed to create role');
+        }
+      } catch (error) {
+        console.error('Error creating role:', error);
+        toast.error(lang === 'ar' ? 'حدث خطأ أثناء إنشاء الصلاحية' : 'An error occurred while creating the role');
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchGroups();
+    fetchRoles();
+  }, [lang]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <Loader className="animate-spin text-[#e11d48]" width={40} height={40} />
+      </div>
+    );
+  }
 
   return (
     <div className='py-1'>
@@ -119,17 +304,17 @@ export default function AccountsForm({
           <Input label={text.lastName} placeholder={text.lastName} name="lastName" value={mainFormik.values.lastName} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.lastName && mainFormik.errors.lastName ? mainFormik.errors.lastName : ''} className="mb-4" />
           <Input label={text.phoneNumber} placeholder={text.phoneNumber} name="phoneNumber" value={mainFormik.values.phoneNumber} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.phoneNumber && mainFormik.errors.phoneNumber ? mainFormik.errors.phoneNumber : ''} className="mb-4" />
           <Input label={text.email} placeholder={text.email} name="email" value={mainFormik.values.email} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.email && mainFormik.errors.email ? mainFormik.errors.email : ''} className="mb-4" />
-
+          
           <label className="block text-sm mb-1.5 font-medium" htmlFor="permissions">
             {text.selectPermissions}
           </label>
           <ReactSelect
             isMulti
             placeholder={text.selectPermissions}
-            value={selectedFeatures.map((feature) => ({ value: feature.title, label: feature.title }))}
+            value={selectedGroups.map((group) => ({ value: group.id, label: group.name }))}
             onChange={(selectedOptions) => {
-              const options = selectedOptions.map((option) => ({ title: option.value, description: '' }));
-              setSelectedFeatures(options);
+              const options = selectedOptions.map((option) => ({ id: option.value, name: option.label }));
+              setSelectedGroups(options);
               mainFormik.setFieldValue('permissions', options);
             }}
             options={dynamicOptions}
@@ -140,13 +325,115 @@ export default function AccountsForm({
               }),
             }}
           />
-          {/* {mainFormik.touched.permissions && mainFormik.errors.permissions && (
+          {mainFormik.touched.permissions && mainFormik.errors.permissions && (
             <div className="text-red text-[13px] mt-0.5">
               {mainFormik.errors.permissions}
             </div>
-          )} */}
+          )}
+
+          <Password label={text.password} placeholder={text.password} name="password" value={mainFormik.values.password}  onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.password && mainFormik.errors.password ? mainFormik.errors.password : ''} className="my-4" />
+          
+          {isGroupModalOpen && (
+            <div className="p-3 border border-gray-200 rounded-md mb-4">
+              <div className="flex justify-end">
+                <ActionIcon onClick={() => {
+                    setIsGroupModalOpen(false);
+                    setNewGroup({ nameAr: '', nameEn: '', roles: [] });
+                    setSelectedRoles([]);
+                  }} className="text-white"
+                >
+                  <PiMinusBold />
+                </ActionIcon>
+              </div>
+              <Input label={text.newGroupAr} placeholder={text.newGroupAr} value={newGroup.nameAr} onChange={(e) => setNewGroup((prev) => ({ ...prev, nameAr: e.target.value }))} className="mb-2" error={newGroupError.nameAr} />
+              <Input label={text.newGroupEn} placeholder={text.newGroupEn} value={newGroup.nameEn} onChange={(e) => setNewGroup((prev) => ({ ...prev, nameEn: e.target.value }))} className="mb-2" error={newGroupError.nameEn} />        
+              <label className="block text-sm mb-1.5 font-medium" htmlFor="permissions">
+                {text.role}
+              </label>
+              <ReactSelect
+                isMulti
+                placeholder={text.role}
+                value={selectedRoles.map((group) => ({ value: group.id, label: group.name }))}
+                onChange={(selectedOptions) => {
+                  const options = selectedOptions.map((option) => ({ id: option.value, name: option.label }));
+                  const RealOptions = selectedOptions.map((option) => ({ roleId: option.value }));
+                  setSelectedRoles(options);
+                  setNewGroup((prev) => ({ ...prev, roles: RealOptions }))                  
+                  if(selectedOptions.length == 0){
+                    setRole(true);
+                  }else{
+                    setRole(false);
+                  }
+                }}
+                options={dynamicRoleOptions}
+                styles={{
+                  menuList: (provided) => ({
+                    ...provided,
+                    maxHeight: '120px',
+                  }),
+                }}
+              />
+              {newGroupError.roles && (
+                <div className="text-red text-[13px] mt-0.5">
+                  {newGroupError.roles}
+                </div>
+              )}
+              <div className="flex gap-2 mt-4">
+                <Button onClick={createGroup} disabled={!newGroup.nameAr || ! newGroup.nameEn || ! newGroup.roles || role} className="w-full">
+                  {text.add}
+                </Button>
+                <Button onClick={() => {
+                    setNewGroup({ nameAr: '', nameEn: '', roles: [] });
+                    setSelectedRoles([]);
+                  }} 
+                  variant="outline" className="w-full"
+                >
+                  {text.clear}
+                </Button>
+              </div>
+            </div>
+          )}
+          
+          {isRoleModalOpen && (
+            <div className="p-3 border border-gray-200 rounded-md mb-4">
+              <div className="flex justify-end">
+                <ActionIcon onClick={() => {
+                    setIsRoleModalOpen(false);
+                    setNewRole({ nameAr: '', nameEn: '' });
+                  }} className="text-white"
+                >
+                  <PiMinusBold />
+                </ActionIcon>
+              </div>
+              <Input label={text.newRoleAr} placeholder={text.newRoleAr} value={newRole.nameAr} onChange={(e) => setNewRole((prev) => ({ ...prev, nameAr: e.target.value }))} className="mb-2" error={newRoleError.nameAr} />
+              <Input label={text.newRoleEn} placeholder={text.newRoleEn} value={newRole.nameEn} onChange={(e) => setNewRole((prev) => ({ ...prev, nameEn: e.target.value }))} className="mb-2" error={newRoleError.nameEn} />        
+              <div className="flex gap-2 mt-4">
+                <Button onClick={createRole} disabled={!newRole.nameAr || !newRole.nameEn} className="w-full">
+                  {text.add}
+                </Button>
+                <Button onClick={() => {
+                    setNewRole({ nameAr: '', nameEn: '' });
+                  }} 
+                  variant="outline" className="w-full"
+                >
+                  {text.clear}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Group and Role Buttons */}
+          <div className="flex gap-3 mb-0">
+            <Button variant="outline" className="w-full" onClick={() => setIsGroupModalOpen(true)}>
+              {text.addGroup}
+            </Button>
+            <Button variant="outline" className="w-full" onClick={() => setIsRoleModalOpen(true)}>
+              {text.addRole}
+            </Button>
+          </div>
+
           {/* Submit Button */}
-          <div className="flex justify-end gap-3 mt-8">
+          <div className="flex justify-end gap-3 mt-4">
             <Button type="submit" className="w-full">
               {text.submit}<PiPlusBold className="ms-1.5 h-[17px] w-[17px]" />
             </Button>

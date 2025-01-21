@@ -74,7 +74,7 @@ export const getColumns = ({
     dataIndex: 'date',
     key: 'date',
     width: 250,
-    render: (createdDate: Date) => <DateCell date={createdDate} />,
+    render: (createdDate: Date) => <DateCell date={createdDate} lang='en' />,
   },
   {
     title: <HeaderCell title="Patient Name" />,

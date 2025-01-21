@@ -15,6 +15,8 @@ import AddStoreButton from '../../storeAddButtom';
 import TableToolbarFilterStores from '../table-toolbar-filter-stores';
 import { useFileContext } from '@/app/components/context/FileContext';
 import { API_BASE_URL } from '@/config/base-url';
+import { useGuardContext } from '@/app/components/context/GuardContext';
+import { useRouter } from 'next/navigation';
 
 export default function StoresTable({lang = "en"}:{lang?:string;}) {
   // const defaultData: Stores[] = [
@@ -111,7 +113,8 @@ export default function StoresTable({lang = "en"}:{lang?:string;}) {
 
   const [defaultData, setDefaultData] = useState<Stores[]>([]);
   const { updateStores, setUpdateStores } = useFileContext();
-   
+  const { setGuard } = useGuardContext();
+  const router = useRouter();
   const { table, setData } = useTanStackTable<Stores>({
     tableData: defaultData,
     columnConfig: defaultColumns(lang),
@@ -209,9 +212,15 @@ export default function StoresTable({lang = "en"}:{lang?:string;}) {
         setData(transformedData);
         setTotalPages(result.totalPages || 1);
       } else {
+        setGuard(false);
+        localStorage.clear();
+        router.push(`/${lang}/signin`);
         console.error('Failed to fetch stores:', response.statusText);
       }
     } catch (error) {
+      setGuard(false);
+      localStorage.clear();
+      router.push(`/${lang}/signin`);
       console.error('Error fetching stores:', error);
     }
   };

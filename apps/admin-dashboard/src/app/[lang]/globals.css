@@ -1501,3 +1501,13 @@ div[style='z-index: 1000001;'],
 [dir='rtl'] :is(.rizzui-checkbox-icon, .rizzui-switch-on-icon) {
   @apply -scale-x-100;
 }
+
+html[dir=rtl] * {
+  font-family: Almarai,sans-serif !important;
+}
+.input-placeholder::placeholder {
+  font-size: 16px;
+}
+.rizzui-input-field::placeholder {
+  font-size: 16px !important;
+}

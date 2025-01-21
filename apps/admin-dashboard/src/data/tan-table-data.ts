@@ -84,11 +84,25 @@ export type Delivery = {
 export type Faq = {
   id: string;
   name: string;
+  title: string;
+  metaDescription: string;
   image: string;
   faqNumber: string;
+  faQs: any;
   userName: string;
 };
-
+export type Artical = {
+  id: string;
+  title: string;
+  description: string;
+  metaDescription: string;
+  slug: string;
+  tags: string;
+  imageUrl: string;
+  createdAt: string;
+  lastUpdatedAt: string;
+  userName: string;
+};
 // export const defaultData: Person[] = [
 //   {
 //     id: '62447',

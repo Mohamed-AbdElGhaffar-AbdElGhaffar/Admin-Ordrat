@@ -20,21 +20,19 @@ interface ActionsCellProps {
   view?:boolean;
 }
 
-const ActionsCellAccounts: React.FC<ActionsCellProps> = ({ row, lang, view = false }) => {
-    // console.log("row: ",row);
-    
+const ActionsCellAccounts: React.FC<ActionsCellProps> = ({ row, lang, view = false }) => {    
   const { openModal } = useModal();
  
   const handleOpenModal = () => {
     openModal({
-      view: <UpdateAccountsForm lang={lang} accountId={row.original.id}  />,
+      view: <UpdateAccountsForm lang={lang} accountId={row.original.id} onSuccess={()=>setUpdateAccounts(true)} />,
       customSize: '480px',
     });
   };
 
   const handleOpenDetailsModal = () => {
     openModal({
-      view: <UpdateAccountsForm lang={lang} title={`معلومات المسؤول`} accountId={row.original.id} />,
+      view: <UpdateAccountsForm lang={lang} title={`معلومات المسؤول`} accountId={row.original.id} onSuccess={()=>setUpdateAccounts(true)} />,
       customSize: '800px',
     });
   };

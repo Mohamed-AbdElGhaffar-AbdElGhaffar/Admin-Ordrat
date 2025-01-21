@@ -14,8 +14,8 @@ export default function HeaderMenuRight({ lang }: { lang?: string }) {
     <div className="ms-auto flex shrink-0 items-center gap-2 xs:gap-3 xl:gap-4">
       <LanguageSwitcher lang={lang!} />
 
-      <div className="grid grid-cols-4 items-center gap-2 text-gray-700 xs:gap-3 xl:gap-4">
-        <ActionIcon
+      <div className="grid grid-cols-1 items-center gap-2 text-gray-700 xs:gap-3 xl:gap-4">
+        {/* <ActionIcon
           aria-label="Notification"
           variant="text"
           className="relative h-[34px] w-[34px] shadow backdrop-blur-md dark:bg-gray-100 md:h-9 md:w-9"
@@ -42,9 +42,10 @@ export default function HeaderMenuRight({ lang }: { lang?: string }) {
               className="absolute right-2.5 top-2.5 -translate-y-1/3 translate-x-1/2"
             />
           </ActionIcon>
-        </MessagesDropdown>
-
-        <SettingsButton t={t} />
+        </MessagesDropdown> */}
+        <div className="hidden">
+          <SettingsButton t={t} />
+        </div>
         <ProfileMenu lang={lang} />
       </div>
     </div>

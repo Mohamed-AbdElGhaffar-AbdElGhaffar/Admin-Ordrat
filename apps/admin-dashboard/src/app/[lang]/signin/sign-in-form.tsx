@@ -5,12 +5,18 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { SubmitHandler } from 'react-hook-form';
 import { PiArrowRightBold } from 'react-icons/pi';
-import { Checkbox, Password, Button, Input, Text } from 'rizzui';
+import { Password, Button, Input } from 'rizzui';
 import { Form } from '@ui/form';
 import { routes } from '@/config/routes';
 // import { loginSchema, LoginSchema } from '@/validators/login.schema';
 import { useTranslation } from '@/app/i18n/client';
 import { AdminLoginSchema, getAdminLoginSchema } from '@/validators/adminLogin.schema';
+import SettingsButton from "@/layouts/settings-button";
+import { useGuardContext } from '@/app/components/context/GuardContext';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
+import axios from 'axios';
+import { API_BASE_URL } from '@/config/base-url';
 
 const initialValues: AdminLoginSchema = {
   email: '',
@@ -21,14 +27,40 @@ export default function SignInForm({lang}:{lang?: string;}) {
   //TODO: why we need to reset it here
   const [reset, setReset] = useState({});
   const { t } = useTranslation(lang!, 'auth');
+  const { guard, setGuard } = useGuardContext();
+  const router = useRouter();
 
-  const onSubmit: SubmitHandler<AdminLoginSchema> = (data) => {
+  const onSubmit: SubmitHandler<AdminLoginSchema> = async (data) => {
     console.log(data);
+
+    try {
+      const response = await axios.post(`${API_BASE_URL}/api/Auth/Login`, {
+        email: data.email,
+        password: data.password,
+      });
+        
+      localStorage.setItem('accessToken', response.data.accessToken);  
+      localStorage.setItem('refreshToken', response.data.refreshToken);
+      localStorage.setItem('userData',  response.data);
+      localStorage.setItem('role', response.data.roles[0]);
+  
+      setGuard(true);
+      toast.success(t('auth-success'));
+      router.push(`/${lang}`);
+    } catch (error) {
+      console.error('Login failed:', error);
+      setGuard(false);
+      toast.error(t('auth-failed'));
+    }
   };
+  
 
   const validationSchema = getAdminLoginSchema(lang);
   return (
-    <>
+    <> 
+      <div className="hidden">
+        <SettingsButton t={t} />
+      </div>
       <Form<AdminLoginSchema>
         validationSchema={validationSchema}
         resetValues={reset}
@@ -45,7 +77,7 @@ export default function SignInForm({lang}:{lang?: string;}) {
               label={t('auth-email')}
               placeholder={t('auth-email-placeholder')}
               className="[&>label>span]:font-medium"
-              inputClassName="text-sm"
+              inputClassName="text-[16px] input-placeholder"
               {...register('email')}
               error={errors.email?.message}
             />
@@ -54,7 +86,7 @@ export default function SignInForm({lang}:{lang?: string;}) {
               placeholder={t('auth-password-placeholder')}
               size="lg"
               className="[&>label>span]:font-medium"
-              inputClassName="text-sm"
+              inputClassName="text-[16px] input-placeholder"
               {...register('password')}
               error={errors.password?.message}
             />

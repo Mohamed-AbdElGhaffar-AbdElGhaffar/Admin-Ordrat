@@ -19,28 +19,28 @@ export default function DefaultLayout({
     lang: string;
   };
 }) {
-  const { layout } = useLayout();
+  // const { layout } = useLayout();
   const isMounted = useIsMounted();
 
   if (!isMounted) {
     return null;
   }
 
-  if (layout === LAYOUT_OPTIONS.HELIUM) {
-    return <HeliumLayout lang={lang}>{children}</HeliumLayout>;
-  }
-  if (layout === LAYOUT_OPTIONS.LITHIUM) {
-    return <LithiumLayout lang={lang}>{children}</LithiumLayout>;
-  }
-  if (layout === LAYOUT_OPTIONS.BERYLLIUM) {
-    return <BerylLiumLayout lang={lang}>{children}</BerylLiumLayout>;
-  }
-  if (layout === LAYOUT_OPTIONS.BORON) {
-    return <BoronLayout lang={lang}>{children}</BoronLayout>;
-  }
-  if (layout === LAYOUT_OPTIONS.CARBON) {
-    return <CarbonLayout lang={lang}>{children}</CarbonLayout>;
-  }
+  // if (layout === LAYOUT_OPTIONS.HELIUM) {
+  //   return <HeliumLayout lang={lang}>{children}</HeliumLayout>;
+  // }
+  // if (layout === LAYOUT_OPTIONS.LITHIUM) {
+  //   return <LithiumLayout lang={lang}>{children}</LithiumLayout>;
+  // }
+  // if (layout === LAYOUT_OPTIONS.BERYLLIUM) {
+  //   return <BerylLiumLayout lang={lang}>{children}</BerylLiumLayout>;
+  // }
+  // if (layout === LAYOUT_OPTIONS.BORON) {
+  //   return <BoronLayout lang={lang}>{children}</BoronLayout>;
+  // }
+  // if (layout === LAYOUT_OPTIONS.CARBON) {
+  //   return <CarbonLayout lang={lang}>{children}</CarbonLayout>;
+  // }
 
   return <HydrogenLayout lang={lang}>{children}</HydrogenLayout>;
 }

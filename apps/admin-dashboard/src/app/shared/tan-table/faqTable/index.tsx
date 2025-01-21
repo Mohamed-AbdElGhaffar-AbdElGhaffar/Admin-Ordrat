@@ -15,10 +15,15 @@ import ImportButton from '../../import-button';
 import AddButton from '../../planAddButtom';
 import { API_BASE_URL } from '@/config/base-url';
 import { useFileContext } from '@/app/components/context/FileContext';
+import { useGuardContext } from '@/app/components/context/GuardContext';
+import { useRouter } from 'next/navigation';
+import FaqsAddButton from '../../faqAddButtom';
 
 export default function FaqTable({lang = "en"}:{lang?:string;}) {
   const [defaultData, setDefaultData] = useState<Faq[]>([]);
   const { updateFaq, setUpdateFaq } = useFileContext();
+  const { setGuard } = useGuardContext();
+  const router = useRouter();
 
   const { table, setData } = useTanStackTable<Faq>({
     tableData: defaultData,
@@ -50,15 +55,21 @@ export default function FaqTable({lang = "en"}:{lang?:string;}) {
 
       const transformedData = data.map((item: any) => ({
         id: item.id,
-        name: lang === 'ar' ? item.name : item.name,
-        userName: lang === 'ar' ? item.name : item.name,
+        name: item.name,
+        title: item.title,
+        userName: item.name,
+        metaDescription: item.metaDescription,
         image: item.imageUrl,
         faqNumber: item.faQs.length,
+        faQs: item.faQs,
       }));
 
       setDefaultData(transformedData);
       setData(transformedData);
     } catch (error) {
+      setGuard(false);
+      localStorage.clear();
+      router.push(`/${lang}/signin`);
       console.error('Error fetching faq:', error);
     }
   };
@@ -86,7 +97,7 @@ export default function FaqTable({lang = "en"}:{lang?:string;}) {
               <PiArrowsClockwiseBold className="me-1.5 h-[17px] w-[17px]" />
               {lang == "en"?"Update Data":'تحديث البيانات'}
             </Button>
-            <AddButton lang={lang} title={lang == "en"?"Add Category":'إضافة قسم'} buttonLabel={lang == "en"?"Add Category":'إضافة قسم'} modalBtnLabel={lang == "en"?"Add Category":'إضافة قسم'} onSuccess={handleRefreshData} />
+            <FaqsAddButton lang={lang} buttonLabel={lang === 'ar' ? "إضافة قسم الأسئلة" : "Add Faq Category"}  onSuccess={handleRefreshData} /> 
         </div>
         <TableToolbar nameEN="faq category" nameAr="قسم الأسئلة" table={table}  lang={lang}/>
         <MainTable table={table} variant={'modern'} lang={lang} />

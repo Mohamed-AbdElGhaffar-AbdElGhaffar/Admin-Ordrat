@@ -15,6 +15,8 @@ import TableToolbarFilterAccounts from '../table-toolbar-filter-accounts';
 import AddAccountsButton from '../../accountsAddButtom';
 import { useFileContext } from '@/app/components/context/FileContext';
 import { API_BASE_URL } from '@/config/base-url';
+import { useGuardContext } from '@/app/components/context/GuardContext';
+import { useRouter } from 'next/navigation';
 
 export default function AccountsTable({lang = "en"}:{lang?:string;}) {
 //   const defaultData: Accounts[] = [
@@ -105,7 +107,9 @@ export default function AccountsTable({lang = "en"}:{lang?:string;}) {
 
   const [defaultData, setDefaultData] = useState<Accounts[]>([]);
   const { updateAccounts, setUpdateAccounts } = useFileContext();
-    
+  const { setGuard } = useGuardContext();
+  const router = useRouter();
+
   const { table, setData } = useTanStackTable<Accounts>({
     tableData: defaultData,
     columnConfig: defaultColumns(lang),
@@ -175,7 +179,6 @@ export default function AccountsTable({lang = "en"}:{lang?:string;}) {
       if (response.ok) {
         const result = await response.json();
   
-        // Transforming API data to match `defaultData` structure
         const transformedData = result.entities.map((account: any) => ({
           id: account.id,
           name: account.name || '',
@@ -195,9 +198,15 @@ export default function AccountsTable({lang = "en"}:{lang?:string;}) {
         setData(transformedData);
         setTotalPages(result.totalPages);
       } else {
+        setGuard(false);
+        localStorage.clear();
+        router.push(`/${lang}/signin`);
         console.error('Failed to fetch reviews:', response.statusText);
       }
     } catch (error) {
+      setGuard(false);
+      localStorage.clear();
+      router.push(`/${lang}/signin`);
       console.error('Error fetching reviews:', error);
     }
   };  

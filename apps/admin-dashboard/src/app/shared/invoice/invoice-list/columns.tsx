@@ -122,7 +122,7 @@ export const getColumns = ({
     dataIndex: 'createdAt',
     key: 'createdAt',
     width: 200,
-    render: (value: Date) => <DateCell date={value} />,
+    render: (value: Date) => <DateCell date={value} lang='en' />,
   },
   {
     title: (
@@ -138,7 +138,7 @@ export const getColumns = ({
     dataIndex: 'dueDate',
     key: 'dueDate',
     width: 200,
-    render: (value: Date) => <DateCell date={value} />,
+    render: (value: Date) => <DateCell date={value} lang='en' />,
   },
   {
     title: (

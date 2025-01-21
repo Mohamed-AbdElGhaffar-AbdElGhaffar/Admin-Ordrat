@@ -16,6 +16,8 @@ import AddReviewsButton from '../../reviewsAddButtom';
 import TableToolbarFilter from '../table-toolbar-filter';
 import { useFileContext } from '@/app/components/context/FileContext';
 import { API_BASE_URL } from '@/config/base-url';
+import { useGuardContext } from '@/app/components/context/GuardContext';
+import { useRouter } from 'next/navigation';
 // import TablePagination from '@/app/shared/table/table-pagination-test';
 // import AddButton from '../../planAddButtom';
 
@@ -123,7 +125,8 @@ export default function ReviewsTable({lang = "en"}:{lang?:string;}) {
 
   const [defaultData, setDefaultData] = useState<Reviews[]>([]);
   const { updateReviews, setUpdateReviews } = useFileContext();
-  
+  const { setGuard } = useGuardContext();
+  const router = useRouter();
   const { table, setData } = useTanStackTable<Reviews>({
     tableData: defaultData,
     columnConfig: defaultColumns(lang),
@@ -217,9 +220,15 @@ export default function ReviewsTable({lang = "en"}:{lang?:string;}) {
         setData(transformedData);
         setTotalPages(result.totalPages);
       } else {
+        setGuard(false);
+        localStorage.clear();
+        router.push(`/${lang}/signin`);
         console.error('Failed to fetch reviews:', response.statusText);
       }
     } catch (error) {
+      setGuard(false);
+      localStorage.clear();
+      router.push(`/${lang}/signin`);
       console.error('Error fetching reviews:', error);
     }
   };  

@@ -6,6 +6,7 @@ import SelectTableColumn from './selectTableColumn';
 import toast from 'react-hot-toast';
 import { API_BASE_URL } from '@/config/base-url';
 import { useFileContext } from '../context/FileContext';
+import axiosClient from '../context/api';
 
 interface SelectInputAdminActiveProps {
   selectItem?: string;
@@ -61,29 +62,23 @@ function SelectInputAdminActive({ lang = 'en', selectItem, selectItemId, rowData
     console.log("Selected column option:", value);
     setSelectedValue(value);
     const isActive = value === '1';
-
+    const updatedData = {
+      firstName: rowData.firstName,
+      lastName: rowData.lastName,
+      phoneNumber: rowData.phoneNumber,
+      email: rowData.email,
+      isActive: isActive,
+    }; 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/Support/Update/${selectItemId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept-Language': lang,
-        },
-        body: JSON.stringify({
-          firstName: rowData.firstName,
-          lastName: rowData.lastName,
-          phoneNumber: rowData.phoneNumber,
-          email: rowData.email,
-          isActive,
-        }),
-      });
+      const response = await axiosClient.put(`/api/Support/Update/${selectItemId}`, updatedData, {
+          headers: { 'Accept-Language': lang },
+        });
 
-      if (response.ok) {
+        if (response.status === 200) {
         toast.success(t.updateSuccess);
         setUpdateAccounts(true);
       } else {
-        const errorData = await response.json();
-        console.error('Error updating status:', errorData);
+        console.error('Error updating status');
         toast.error(t.updateFail);
       }
     } catch (error) {

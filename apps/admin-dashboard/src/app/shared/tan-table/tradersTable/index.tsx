@@ -17,6 +17,8 @@ import AddTradersButton from '../../TradersAddButtom';
 import { useFileContext } from '@/app/components/context/FileContext';
 import { API_BASE_URL } from '@/config/base-url';
 import TableToolbarFilterTraders from '../table-toolbar-filter-traders';
+import { useGuardContext } from '@/app/components/context/GuardContext';
+import { useRouter } from 'next/navigation';
 
 export default function TradersTable({lang = "en"}:{lang?:string;}) {
   // const defaultData: Traders[] = [
@@ -112,7 +114,8 @@ export default function TradersTable({lang = "en"}:{lang?:string;}) {
 
   const [defaultData, setDefaultData] = useState<Traders[]>([]);
   const { updateSeller, setUpdateSeller } = useFileContext();
-
+  const { setGuard } = useGuardContext();
+  const router = useRouter();
   const { table, setData } = useTanStackTable<Traders>({
     tableData: defaultData,
     columnConfig: defaultColumns(lang),
@@ -201,9 +204,15 @@ export default function TradersTable({lang = "en"}:{lang?:string;}) {
         setData(transformedData);
         setTotalPages(result.totalPages);
       } else {
+        setGuard(false);
+        localStorage.clear();
+        router.push(`/${lang}/signin`);
         console.error('Failed to fetch Seller:', response.statusText);
       }
     } catch (error) {
+      setGuard(false);
+      localStorage.clear();
+      router.push(`/${lang}/signin`);
       console.error('Error fetching Seller:', error);
     }
   };  

@@ -14,11 +14,14 @@ import { PiArrowsClockwiseBold } from 'react-icons/pi';
 import ImportButton from '../../import-button';
 import { useFileContext } from '@/app/components/context/FileContext';
 import { API_BASE_URL } from '@/config/base-url';
+import { useGuardContext } from '@/app/components/context/GuardContext';
+import { useRouter } from 'next/navigation';
 
 export default function AdvantageTable({lang = "en"}:{lang?:string;}) {
   const [defaultData, setDefaultData] = useState<Feature[]>([]);
   const { updateData, setUpdateData } = useFileContext();
-  
+  const { setGuard } = useGuardContext();
+  const router = useRouter();
   const { table, setData } = useTanStackTable<Feature>({
     tableData: defaultData,
     columnConfig: defaultColumns(lang),
@@ -88,6 +91,10 @@ export default function AdvantageTable({lang = "en"}:{lang?:string;}) {
       setDefaultData(transformedData);
       setData(transformedData);
     } catch (error) {
+      setGuard(false);
+      localStorage.clear();
+      router.push(`/${lang}/signin`);
+      
       console.error('Error fetching plans:', error);
     }
   };

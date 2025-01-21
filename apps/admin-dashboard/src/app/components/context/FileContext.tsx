@@ -19,6 +19,8 @@ type FileContextType = {
   setUpdateSeller: React.Dispatch<React.SetStateAction<boolean>>;
   updateFaq: boolean;
   setUpdateFaq: React.Dispatch<React.SetStateAction<boolean>>;
+  updateArtical: boolean;
+  setUpdateArtical: React.Dispatch<React.SetStateAction<boolean>>;
 
   login: boolean;
   setLogin: React.Dispatch<React.SetStateAction<boolean>>;
@@ -35,11 +37,23 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [updateAccounts, setUpdateAccounts] = useState<boolean>(false);
   const [updateSeller, setUpdateSeller] = useState<boolean>(false);
   const [updateFaq, setUpdateFaq] = useState<boolean>(false);
+  const [updateArtical, setUpdateArtical] = useState<boolean>(false);
  
   const [login, setLogin] = useState<boolean>(false);
 
   return (
-    <FileContext.Provider value={{ fileData, setFileData, updateData, setUpdateData, updateReviews, setUpdateReviews, updateBuyers, setUpdateBuyers, updateStores, setUpdateStores, updateAccounts, setUpdateAccounts, updateSeller, setUpdateSeller, updateFaq, setUpdateFaq, login, setLogin }}>
+    <FileContext.Provider value={{ 
+      fileData, setFileData, 
+      updateData, setUpdateData, 
+      updateReviews, setUpdateReviews, 
+      updateBuyers, setUpdateBuyers, 
+      updateStores, setUpdateStores, 
+      updateAccounts, setUpdateAccounts, 
+      updateSeller, setUpdateSeller, 
+      updateFaq, setUpdateFaq, 
+      updateArtical, setUpdateArtical, 
+      login, setLogin 
+    }}>
       {children}
     </FileContext.Provider>
   );

@@ -14,6 +14,8 @@ import { PiArrowsClockwiseBold } from 'react-icons/pi';
 import TableToolbarFilterBuyers from '../table-toolbar-filter-buyers';
 import { useFileContext } from '@/app/components/context/FileContext';
 import { API_BASE_URL } from '@/config/base-url';
+import { useGuardContext } from '@/app/components/context/GuardContext';
+import { useRouter } from 'next/navigation';
 // import AddButton from '../../planAddButtom';
 
 export default function BuyersTable({lang = "en"}:{lang?:string;}) {
@@ -101,7 +103,8 @@ export default function BuyersTable({lang = "en"}:{lang?:string;}) {
 
   const [defaultData, setDefaultData] = useState<Buyers[]>([]);
   const { updateBuyers, setUpdateBuyers } = useFileContext();
-  
+  const { setGuard } = useGuardContext();
+  const router = useRouter();
   
   const { table, setData } = useTanStackTable<Buyers>({
     tableData: defaultData,
@@ -194,9 +197,15 @@ export default function BuyersTable({lang = "en"}:{lang?:string;}) {
         
         setTotalPages(result.totalPages);
       } else {
+        setGuard(false);
+        localStorage.clear();
+        router.push(`/${lang}/signin`);
         console.error('Failed to fetch reviews:', response.statusText);
       }
     } catch (error) {
+      setGuard(false);
+      localStorage.clear();
+      router.push(`/${lang}/signin`);
       console.error('Error fetching reviews:', error);
     }
   };  

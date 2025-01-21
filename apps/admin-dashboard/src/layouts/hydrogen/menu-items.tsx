@@ -45,7 +45,8 @@ import {
   PiShapesDuotone,
   PiNewspaperClippingDuotone,
   PiTruckDuotone,
-  PiQuestionBold
+  PiQuestionBold,
+  PiMonitorPlay
 } from 'react-icons/pi';
 
 // Note: do not add href in the label object, it is rendering as label
@@ -99,6 +100,11 @@ export const menuItems = [
     name: 'sidebar-menu-faq',
     href: routes.faq,
     icon: <PiQuestionBold />,
+  },
+  {
+    name: 'sidebar-menu-artical',
+    href: routes.artical,
+    icon: <PiMonitorPlay />,
   },
   // // label start
   // {

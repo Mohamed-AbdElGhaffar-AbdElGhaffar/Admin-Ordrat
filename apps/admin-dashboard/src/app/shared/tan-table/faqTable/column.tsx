@@ -1,15 +1,8 @@
-import Link from 'next/link';
-import { routes } from '@/config/routes';
-import EyeIcon from '@components/icons/eye';
 import { Faq } from '@/data/tan-table-data';
-import DateCell from '@ui/date-cell';
-import PencilIcon from '@components/icons/pencil';
-import AvatarCard from '@ui/avatar-card';
-import DeletePopover from '@/app/shared/delete-popover';
 import { createColumnHelper } from '@tanstack/react-table';
-import { ActionIcon, Badge, Checkbox, Text, Tooltip } from 'rizzui';
-import ActionsCellPlan from '@/app/components/plan/actionsCellPlan/ActionsCellPlan';
+import { Text } from 'rizzui';
 import Image from 'next/image';
+import ActionsCellFAQ from '@/app/components/faq/actionsCellFAQ/ActionsCellFAQ';
 
 const columnHelper = createColumnHelper<Faq>();
 
@@ -43,12 +36,31 @@ export const defaultColumns = (lang: string) => [
   }),
   columnHelper.accessor('faqNumber', {
     id: 'faqNumber',
-    size: 100,
+    size: 140,
     header: lang === 'ar' ? 'عدد الأسئلة' : 'FAQ Number',
-    // filterFn: 'createdDate' as any,
     cell: ({ row }) => (
       <Text className="text-center font-lexend text-sm font-medium text-gray-900 dark:text-gray-700">
         {row.original.faqNumber}
+      </Text>
+    ),
+  }),
+  columnHelper.accessor('title', {
+    id: 'title',
+    size: 200,
+    header: lang === 'ar' ? 'عنوان' : 'Title',
+    cell: ({ row }) => (
+      <Text className="font-lexend text-sm font-medium text-gray-900 dark:text-gray-700">
+        {row.original.title}
+      </Text>
+    ),
+  }),
+  columnHelper.accessor('metaDescription', {
+    id: 'metaDescription',
+    size: 240,
+    header: lang === 'ar' ? 'وصف جوجل' : 'Meta Description',
+    cell: ({ row }) => (
+      <Text className="text-center font-lexend text-sm font-medium text-gray-900 dark:text-gray-700">
+        {row.original.metaDescription}
       </Text>
     ),
   }),
@@ -58,6 +70,6 @@ export const defaultColumns = (lang: string) => [
     header: '',
     enablePinning: true,
     enableSorting: false,
-    cell: ({ row }) => <ActionsCellPlan row={row} lang={lang}/>,
+    cell: ({ row }) => <ActionsCellFAQ row={row} lang={lang}/>,
   })
 ];

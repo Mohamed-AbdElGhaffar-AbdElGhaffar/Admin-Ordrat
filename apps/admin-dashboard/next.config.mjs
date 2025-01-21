@@ -3,7 +3,8 @@
 const nextConfig = {
   images: {
     domains:[
-      'testapi.ordrat.com'
+      'testapi.ordrat.com',
+      'ordratuserbucket.s3.eu-north-1.amazonaws.com',
     ],
     remotePatterns: [
       {

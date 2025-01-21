@@ -5,6 +5,8 @@ import { DropzoneRootProps, DropzoneInputProps } from 'react-dropzone';
 import cn from '@utils/class-names';
 import UploadIcon from '@components/shape/upload';
 import { useFileContext } from '../components/context/FileContext';
+// import { useFileContext } from '../Context/FileContext';
+// import { useFileContext } from '../components/context/FileContext';
 
 const inputClasses = {
   base: 'p-5 relative border rounded-xl cursor-pointer duration-75 ease-in-out focus:ring',
@@ -91,6 +93,8 @@ export interface UploadProps
   > {
   /** Specify type of the files */
   accept: 'img' | 'pdf' | 'csv' | 'imgAndPdf' | 'all';
+  /** initial image */
+  initialImage?: string;
   /** Pass multiple files */
   multiple?: boolean;
   /** Pass multipleFiles to know if he want one file or more */
@@ -163,12 +167,15 @@ function Upload(
     labelClassName,
     lang = 'en',
     multipleFiles = true,
+    multiple = false,
+    initialImage,
     ...props
   }: React.PropsWithChildren<UploadProps>,
   ref: ForwardedRef<HTMLInputElement>
 ) {
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const { fileData, setFileData } = useFileContext();
+  
+  const [uploadedImage, setUploadedImage] = useState<string | null>(initialImage || null);
+  const { fileData } = useFileContext();
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
@@ -189,6 +196,9 @@ function Upload(
       setUploadedImage(null);
     }
   }, [fileData]);
+  useEffect(() => {
+    setUploadedImage(initialImage || null);
+  }, [initialImage]);
 
   const t = translations[lang as 'en' | 'ar'] || translations.en;
   
@@ -226,7 +236,7 @@ function Upload(
           }}
         />
         <div className="flex flex-col items-center @2xl:flex-row">
-          {uploadedImage && multipleFiles && fileData ? (
+          {uploadedImage && multipleFiles==false && multiple ? (
             <img
               src={uploadedImage}
               alt="Uploaded file"
