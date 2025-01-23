@@ -12,6 +12,7 @@ import * as Yup from 'yup';
 import { useFileContext } from '../../context/FileContext';
 import { API_BASE_URL } from '@/config/base-url';
 import { Loader } from 'lucide-react';
+import axiosClient from '../../context/api';
 
 type Address = {
   city: string;
@@ -84,16 +85,15 @@ export default function UpdateTradersForm({
 
   const fetchTradersDetails = async (id: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/Seller/Filter`, {
-        method: 'GET',
+      const response = await axiosClient.get('/api/Seller/Filter', {
         headers: {
           Accept: '*/*',
           'Accept-Language': lang,
         },
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status === 200) {
+        const data = await response.data;
         const trader = data.entities.find((trader: { id: string }) => trader.id === id);
 
         if (trader) {
@@ -155,22 +155,20 @@ export default function UpdateTradersForm({
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/Seller/Update/${traderId}`, {
-          method: 'PUT',
+        const response = await axiosClient.put(`/api/Seller/Update/${traderId}`, values, {
           headers: {
             'Content-Type': 'application/json',
             'Accept-Language': lang,
           },
-          body: JSON.stringify(values),
         });
 
-        if (response.ok) {
+        if (response.status === 200 || response.status === 204) {
           toast.success(lang === 'ar' ? 'تم تعديل التاجر بنجاح!' : 'Trader updated successfully!');
           setUpdateSeller(true);
           // console.log("Selected Addresses:", selectedAddresses);
           closeModal();
         } else {
-          const errorData = await response.json();
+          const errorData = await response.data;
           toast.error(errorData.message || lang === 'ar' ? 'حدث خطأ أثناء التعديل' : 'An error occurred while updating');
         }
       } catch (error) {

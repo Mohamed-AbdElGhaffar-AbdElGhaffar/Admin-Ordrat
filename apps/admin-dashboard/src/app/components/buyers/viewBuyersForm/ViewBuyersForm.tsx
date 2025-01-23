@@ -12,6 +12,7 @@ import * as Yup from 'yup';
 import { boolean } from 'zod';
 import { Loader } from 'lucide-react';
 import { API_BASE_URL } from '@/config/base-url';
+import axiosClient from '../../context/api';
 
 type Feature = {
   title: string;
@@ -54,16 +55,15 @@ export default function ViewBuyersForm({
 
   const fetchGuestData = async (id: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/EndUser/GetById/${id}`, {
-        method: 'GET',
+      const response = await axiosClient.get(`/api/EndUser/GetById/${id}`, {
         headers: {
           Accept: '*/*',
           'Accept-Language': lang,
         },
       });
-
-      if (response.ok) {
-        const data = await response.json();
+  
+      if (response.status === 200) {
+        const data = response.data;
         const transformedData: GuestData = {
           id,
           name: `${data.firstName} ${data.lastName}`,

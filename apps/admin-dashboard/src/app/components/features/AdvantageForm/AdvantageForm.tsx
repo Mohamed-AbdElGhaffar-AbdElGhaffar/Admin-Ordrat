@@ -10,6 +10,7 @@ import styles from './AdvantageForm.module.css';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { API_BASE_URL } from '@/config/base-url';
+import axiosClient from '../../context/api';
 
 type AdvantageFormProps = {
   title?: string;
@@ -52,16 +53,14 @@ export default function AdvantageForm({
     validationSchema: mainFormSchema,
     onSubmit: async (values) => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/Feature/Create`, {
-          method: 'POST',
+        const response = await axiosClient.post('/api/Feature/Create', values, {
           headers: {
             'Content-Type': 'application/json',
-            'Accept-Language': lang,
+            Accept: '*/*',
           },
-          body: JSON.stringify(values),
         });
 
-        if (response.ok) {
+        if (response.status === 200 || response.status === 201) {
           if (onSuccess) onSuccess();
           toast.success(lang === 'ar' ? 'تم إضافة الميزة بنجاح!' : 'Feature added successfully!');
           closeModal();

@@ -34,17 +34,6 @@ interface ActionsCellProps {
 }
 
 const ActionsCellBuyers: React.FC<ActionsCellProps> = ({ row, lang, view = false }) => {
-    // const guestData = {
-    //   id: row.original.id,
-    //   name: lang === 'ar' ? 'علي محمد' : 'Ali Mohamed',
-    //   totalItems: 5,
-    //   totalPaid: '200 USD',
-    //   email: 'ali.mohamed@example.com',
-    //   phoneNumber: '+201234567890',
-    //   country: lang === 'ar' ? 'مصر' : 'Egypt',
-    //   state: lang === 'ar' ? 'القاهرة' : 'Cairo',
-    //   city: lang === 'ar' ? 'مدينة نصر' : 'Nasr City',
-    // };
     const title= lang === 'ar' ? 'معلومات الشتري' : 'Buyers Information';
 
     const [guestData, setGuestData] = useState<GuestData | null>(null);

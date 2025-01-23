@@ -17,6 +17,8 @@ import DropdownAction from '@components/charts/dropdown-action';
 import { formatNumber } from '@utils/format-number';
 import { useTranslation } from '@/app/i18n/client';
 import { useEffect, useState } from 'react';
+import axiosClient from '@/app/components/context/api';
+import { Loader } from 'lucide-react';
 
 const data = [
   {
@@ -86,14 +88,47 @@ export default function Department({ className, lang }: { className?: string; la
   }
 
   const { t } = useTranslation(lang!, "dashboardTable");
-  const [chartData, setChartData] = useState(localizedData['en']);
+  // const [chartData, setChartData] = useState(localizedData['en']);
+
+  // useEffect(() => {
+  //   if (lang == 'ar') {
+  //     setChartData(localizedData[lang]);
+  //   }else{
+  //     setChartData(localizedData['en']);
+  //   }
+  // }, [lang]);
+  const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch data from API
+  const fetchBestSellers = async () => {
+    try {
+      const response = await axiosClient.get('/api/AdminStatistics/GetBestSellers', {
+        headers: {
+          'Accept-Language': lang || 'en',
+        },
+      });
+
+      if (response.status === 200) {
+        const bestSellers = response.data.slice(0, 6); // Take the first 6 entries
+        const transformedData = bestSellers.map((seller: any, index: number) => ({
+          name: seller.name,
+          total: seller.totalSales,
+          fill: ['#2B7F75', '#FFD66B', '#04364A', '#176B87', '#64CCC5', '#F7B787'][index % 6], // Dynamic fill colors
+        }));
+        setChartData(transformedData);
+      } else {
+        console.error('Failed to fetch best sellers');
+      }
+    } catch (error: any) {
+      console.error('Error fetching best sellers:', error.response || error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (lang == 'ar') {
-      setChartData(localizedData[lang]);
-    }else{
-      setChartData(localizedData['en']);
-    }
+    fetchBestSellers();
   }, [lang]);
 
   return (
@@ -111,49 +146,57 @@ export default function Department({ className, lang }: { className?: string; la
       //   />
       // }
     >
-      <div className="mb-4 mt-2 flex items-center gap-2 @lg:mt-1">
-        <Title as="h2" className="font-inter font-bold">
-          73,504
-        </Title>
-        <span className="flex items-center gap-1 text-green-dark">
-          <TrendingUpIcon className="h-auto w-5" />
-          <span className="font-semibold leading-none"> +32.40%</span>
-        </span>
-      </div>
-      <SimpleBar>
-        <div className="h-[20rem] w-full pt-1">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart
-              layout="vertical"
-              data={chartData}
-              className="[&_.recharts-tooltip-cursor]:fill-opacity-20 dark:[&_.recharts-tooltip-cursor]:fill-opacity-10 [&_.recharts-cartesian-axis-tick-value]:fill-gray-300 dark:[&_.recharts-cartesian-axis-tick-value]:fill-gray-700 [&_path.recharts-rectangle]:!stroke-none"
-            >
-              <XAxis
-                type="number"
-                axisLine={false}
-                tickLine={false}
-                hide={true}
-              />
-              <YAxis
-                dataKey="name"
-                type="category"
-                axisLine={false}
-                tickLine={false}
-                style={{ fontSize: 13, fontWeight: 500 }}
-                width={100}
-                className="rtl:-translate-x-24 [&_.recharts-text]:fill-gray-700"
-              />
-              <Bar dataKey="total" barSize={28} radius={[50, 50, 50, 50]}>
-                <LabelList
-                  position="right"
-                  dataKey="total"
-                  content={<CustomizedLabel />}
-                />
-              </Bar>
-            </ComposedChart>
-          </ResponsiveContainer>
+      {loading?
+        <div className="w-full flex items-center justify-center min-h-[200px]">
+          <Loader className="animate-spin text-[#e11d48]" width={40} height={40} />
         </div>
-      </SimpleBar>
+        :
+        <>
+          <div className="mb-4 mt-2 flex items-center gap-2 @lg:mt-1">
+            <Title as="h2" className="font-inter font-bold">
+              73,504
+            </Title>
+            <span className="flex items-center gap-1 text-green-dark">
+              <TrendingUpIcon className="h-auto w-5" />
+              <span className="font-semibold leading-none"> +32.40%</span>
+            </span>
+          </div>
+          <SimpleBar>
+            <div className="h-[20rem] w-full pt-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart
+                  layout="vertical"
+                  data={chartData}
+                  className="[&_.recharts-tooltip-cursor]:fill-opacity-20 dark:[&_.recharts-tooltip-cursor]:fill-opacity-10 [&_.recharts-cartesian-axis-tick-value]:fill-gray-300 dark:[&_.recharts-cartesian-axis-tick-value]:fill-gray-700 [&_path.recharts-rectangle]:!stroke-none"
+                >
+                  <XAxis
+                    type="number"
+                    axisLine={false}
+                    tickLine={false}
+                    hide={true}
+                  />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    axisLine={false}
+                    tickLine={false}
+                    style={{ fontSize: 13, fontWeight: 500 }}
+                    width={100}
+                    className="rtl:-translate-x-24 [&_.recharts-text]:fill-gray-700"
+                  />
+                  <Bar dataKey="total" barSize={28} radius={[50, 50, 50, 50]}>
+                    <LabelList
+                      position="right"
+                      dataKey="total"
+                      content={<CustomizedLabel />}
+                    />
+                  </Bar>
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </SimpleBar>
+        </>
+      }
     </WidgetCard>
   );
 }

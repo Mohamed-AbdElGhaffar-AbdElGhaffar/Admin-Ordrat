@@ -102,6 +102,7 @@ export default function TableToolbarFilterAccounts<TData extends Record<string, 
   const {
     options: { meta },
   } = table;
+  const { setUpdateAccounts } = useFileContext();
 
   return (
     <div className="flex items-center justify-between">
@@ -109,9 +110,20 @@ export default function TableToolbarFilterAccounts<TData extends Record<string, 
         <Input
           type="search"
           placeholder={placeholder}
-          value={table.getState().globalFilter ?? ''}
-          onClear={() => table.setGlobalFilter('')}
-          onChange={(e) => table.setGlobalFilter(e.target.value)}
+          value={inputName}
+          onClear={() => {
+            if(inputName){setInputName('');}
+            setUpdateAccounts(true);
+            table.setGlobalFilter('');
+          }}
+          onChange={(e) => {
+            if (setInputName) {
+              setInputName(e.target.value);
+              setUpdateAccounts(true);
+            }else{
+              table.setGlobalFilter(e.target.value);
+            }
+          }}
           inputClassName="h-9"
           clearable={true}
           prefix={<PiMagnifyingGlassBold className="h-4 w-4" />}
@@ -262,7 +274,7 @@ function FilterElements<T extends Record<string, any>>({
 
   return (
     <>
-      <InputField
+      {/* <InputField
         value={inputName}
         placeholder={t.name}
         className={isMediumScreen?'w-full':'w-48'}
@@ -271,17 +283,17 @@ function FilterElements<T extends Record<string, any>>({
           setInputName(v);
           setUpdateAccounts(true);
         }}
+      /> */}
+      <InputField
+        value={inputEmail}
+        placeholder={t.email}
+        className={isMediumScreen?'w-full':'w-48'}
+        onChange={(v) => {
+          console.log("inputEmail: ",v);
+          setInputEmail(v);
+          setUpdateAccounts(true);
+        }}
       />
-        <InputField
-          value={inputEmail}
-          placeholder={t.email}
-          className={isMediumScreen?'w-full':'w-48'}
-          onChange={(v) => {
-            console.log("inputEmail: ",v);
-            setInputEmail(v);
-            setUpdateAccounts(true);
-          }}
-        />
       <InputField
         value={inputPhoneNumber}
         placeholder={t.phoneNumber}

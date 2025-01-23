@@ -15,6 +15,7 @@ import RoleSelect from '@/app/shared/tan-table/selectInput';
 import { ChromePicker } from 'react-color';
 import { Loader } from 'lucide-react';
 import { API_BASE_URL } from '@/config/base-url';
+import axiosClient from '../../context/api';
 
 type Feature = {
   title: string;
@@ -57,6 +58,10 @@ export default function StoresForm({
   });
   const { fileData } = useFileContext();
   const text = {
+    TitleAr: lang === 'ar' ? 'أسم جوجل (عربي)' : 'Title (Arabic)',
+    TitleEn: lang === 'ar' ? 'أسم جوجل (انجليزي)' : 'Title (English)',
+    MetaDescriptionAr: lang === 'ar' ? 'وصف جوجل (عربي)' : 'MetaDescription (Arabic)',
+    MetaDescriptionEn: lang === 'ar' ? 'وصف جوجل (انجليزي)' : 'MetaDescription (English)',
     nameAr: lang === 'ar' ? 'الأسم (عربي)' : 'Name (Arabic)',
     nameEn: lang === 'ar' ? 'الأسم (انجليزي)' : 'Name (English)',
     subDomain: lang === 'ar' ? 'الصب دومين' : 'Sub Domain',
@@ -81,6 +86,10 @@ export default function StoresForm({
   const { setUpdateStores } = useFileContext();
 
   const mainFormSchema = Yup.object().shape({
+    TitleAr: Yup.string().required(text.TitleAr + ' ' + requiredMessage),
+    TitleEn: Yup.string().required(text.TitleEn + ' ' + requiredMessage),
+    MetaDescriptionAr: Yup.string().required(text.MetaDescriptionAr + ' ' + requiredMessage),
+    MetaDescriptionEn: Yup.string().required(text.nameEn + ' ' + requiredMessage),
     nameAr: Yup.string().required(text.nameAr + ' ' + requiredMessage),
     nameEn: Yup.string().required(text.nameEn + ' ' + requiredMessage),
     subDomain: Yup.string().required(text.subDomain + ' ' + requiredMessage),
@@ -106,6 +115,10 @@ export default function StoresForm({
 
   const mainFormik = useFormik({
     initialValues: {
+      TitleAr: '',
+      TitleEn: '',
+      MetaDescriptionAr: '',
+      MetaDescriptionEn: '',
       nameAr: '',
       nameEn: '',
       subDomain: '',
@@ -119,6 +132,10 @@ export default function StoresForm({
     validationSchema: mainFormSchema,
     onSubmit: async (values) => {
       const formData = new FormData();
+      formData.append('TitleAr', values.TitleAr);
+      formData.append('TitleEn', values.TitleEn);
+      formData.append('MetaDescriptionAr', values.MetaDescriptionAr);
+      formData.append('MetaDescriptionEn', values.MetaDescriptionEn);
       formData.append('NameAr', values.nameAr);
       formData.append('NameEn', values.nameEn);
       formData.append('SubdomainName', values.subDomain);
@@ -136,20 +153,18 @@ export default function StoresForm({
       formData.append('TopSellingIsEnabled', 'true');
   
       try {
-        const response = await fetch(`${API_BASE_URL}/api/Shop/Create`, {
-          method: 'POST',
+        const response = await axiosClient.post('/api/Shop/Create', formData, {
           headers: {
             'Accept-Language': lang,
           },
-          body: formData,
         });
-  
-        if (response.ok) {
+    
+        if (response.status === 200 || response.status === 201) {
           closeModal();
           toast.success(lang === 'ar' ? 'تم انشاء المتجر بنجاح!' : 'Shop created successfully!');
           setUpdateStores(true);
         } else {
-          const errorText = await response.text();
+          const errorText = response.data || 'Unknown error';
           toast.error(
             lang === 'ar'
               ? `فشل في إنشاء المتجر: ${errorText}`
@@ -201,16 +216,15 @@ export default function StoresForm({
 
   const fetchSellers = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/Seller/Filter`, {
-        method: 'GET',
+      const response = await axiosClient.get('/api/Seller/Filter', {
         headers: {
           Accept: '*/*',
           'Accept-Language': lang,
         },
       });
-
-      if (response.ok) {
-        const data = await response.json();
+  
+      if (response.status === 200) {
+        const data = response.data;
         const sellers = data.entities.map((seller: any) => ({
           id: seller.id,
           name: seller.name,
@@ -314,23 +328,25 @@ export default function StoresForm({
     if (validateSellerInputs()) {
       console.log('Seller Data:', seller);
       try {
-        const response = await fetch(`${API_BASE_URL}/api/Seller/Create`, {
-          method: 'POST',
-          headers: {
-            'Accept': '*/*',
-            'Accept-Language': lang,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        const response = await axiosClient.post(
+          '/api/Seller/Create',
+          {
             email: seller.email,
             phoneNumber: seller.phoneNumber,
             firstName: seller.firstName,
             lastName: seller.lastName,
-          }),
-        });
+          },
+          {
+            headers: {
+              Accept: '*/*',
+              'Accept-Language': lang,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
   
-        if (response.ok) {
-          const data = await response.json();
+        if (response.status === 200 || response.status === 201) {
+          const data = await response.data;
           toast.success(
             lang === 'ar' ? 'تمت إضافة التاجر بنجاح!' : data.message || 'Seller added successfully!'
           );
@@ -338,7 +354,7 @@ export default function StoresForm({
           setVisibleSection('');
           fetchSellers();
         } else {
-          const errorText = await response.text();
+          const errorText = await response.data;
           toast.error(
             lang === 'ar'
               ? `فشل في إضافة التاجر: ${errorText}`
@@ -366,6 +382,10 @@ export default function StoresForm({
           e.preventDefault();
           mainFormik.handleSubmit();
         }}>
+          <Input label={text.TitleAr} placeholder={text.TitleAr} name="TitleAr" value={mainFormik.values.TitleAr} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.TitleAr && mainFormik.errors.TitleAr ? mainFormik.errors.TitleAr : ''} className="mb-4" />
+          <Input label={text.TitleEn} placeholder={text.TitleEn} name="TitleEn" value={mainFormik.values.TitleEn} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.TitleEn && mainFormik.errors.TitleEn ? mainFormik.errors.TitleEn : ''} className="mb-4" />
+          <Input label={text.MetaDescriptionAr} placeholder={text.MetaDescriptionAr} name="MetaDescriptionAr" value={mainFormik.values.MetaDescriptionAr} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.MetaDescriptionAr && mainFormik.errors.MetaDescriptionAr ? mainFormik.errors.MetaDescriptionAr : ''} className="mb-4" />
+          <Input label={text.MetaDescriptionEn} placeholder={text.MetaDescriptionEn} name="MetaDescriptionEn" value={mainFormik.values.MetaDescriptionEn} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.MetaDescriptionEn && mainFormik.errors.MetaDescriptionEn ? mainFormik.errors.MetaDescriptionEn : ''} className="mb-4" />
           <Input label={text.nameAr} placeholder={text.nameAr} name="nameAr" value={mainFormik.values.nameAr} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.nameAr && mainFormik.errors.nameAr ? mainFormik.errors.nameAr : ''} className="mb-4" />
           <Input label={text.nameEn} placeholder={text.nameEn} name="nameEn" value={mainFormik.values.nameEn} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.nameEn && mainFormik.errors.nameEn ? mainFormik.errors.nameEn : ''} className="mb-4" />
           <Input label={text.subDomain} placeholder={text.subDomain} name="subDomain" value={mainFormik.values.subDomain} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.subDomain && mainFormik.errors.subDomain ? mainFormik.errors.subDomain : ''} className="mb-4" />

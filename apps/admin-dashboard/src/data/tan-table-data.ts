@@ -35,6 +35,7 @@ export type Reviews = {
   shop: string;
   comment: string;
   evaluation: string;
+  createdAt: string;
   userName: string;
 };
 export type Buyers = {

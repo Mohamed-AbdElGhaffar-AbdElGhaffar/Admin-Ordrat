@@ -11,6 +11,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { API_BASE_URL } from '@/config/base-url';
 import { useFileContext } from '../../context/FileContext';
+import axiosClient from '../../context/api';
 
 type Feature = {
   id: string;
@@ -71,6 +72,8 @@ export default function PlanForm({
     featureDescriptionEn: lang === 'ar' ? 'الوصف (إنجليزي)' : 'Description (English)',
     add: lang === 'ar' ? 'اضافة' : 'Add',
     clear: lang === 'ar' ? 'تفريغ' : 'Clear',
+
+    requiredMessage: lang === 'ar' ? ' يجب أن يكون رقمًا' : ' Must be a number',
   };
 
   const requiredMessage = lang === 'ar' ? 'مطلوب' : 'is required';
@@ -80,8 +83,12 @@ export default function PlanForm({
     nameEn: Yup.string().required(text.nameEn + ' ' + requiredMessage),
     descriptionAr: Yup.string().required(text.descriptionAr + ' ' + requiredMessage),
     descriptionEn: Yup.string().required(text.descriptionEn + ' ' + requiredMessage),
-    annualPrice: Yup.number().required(text.annualPrice + ' ' + requiredMessage),
-    monthlyPrice: Yup.number().required(text.monthlyPrice + ' ' + requiredMessage),
+    annualPrice: Yup.string()
+    .required(text.annualPrice + ' ' + requiredMessage)
+    .test('is-number', text.annualPrice + text.requiredMessage, (value) => !isNaN(parseFloat(value))),
+    monthlyPrice: Yup.string()
+    .required(text.monthlyPrice + ' ' + requiredMessage)
+    .test('is-number', text.monthlyPrice + text.requiredMessage, (value) => !isNaN(parseFloat(value))),
   });
 
   const mainFormik = useFormik({
@@ -109,24 +116,21 @@ export default function PlanForm({
     
         console.log("Request Payload:", requestPayload);
     
-        const response = await fetch(`${API_BASE_URL}/api/Plan/Create`, {
-          method: 'POST',
+        const response = await axiosClient.post('/api/Plan/Create', requestPayload, {
           headers: {
             'Content-Type': 'application/json',
             Accept: '*/*',
             'Accept-Language': lang,
           },
-          body: JSON.stringify(requestPayload),
         });
     
-        if (response.ok) {
+        if (response.status === 200 || response.status === 201) {
           console.log('Plan created successfully');
           toast.success(lang === 'ar' ? 'تم إضافة الخطة بنجاح!' : 'Plan added successfully!');
           closeModal();
           if (onSuccess) onSuccess();
         } else {
-          const errorResponse = await response.json();
-          console.error('Failed to create plan:', errorResponse);
+          console.error('Failed to create plan:', response.data);
           toast.error(lang === 'ar' ? 'حدث خطأ أثناء إضافة الخطة' : 'Failed to add plan');
         }
       } catch (error) {
@@ -173,25 +177,21 @@ export default function PlanForm({
 
   const fetchAllFeatures = async () => {
     try {
-      const responseAr = await fetch(`${API_BASE_URL}/api/Feature/GetAll`, {
-        method: 'GET',
+      const responseAr = await axiosClient.get('/api/Feature/GetAll', {
         headers: {
-          Accept: '*/*',
           'Accept-Language': 'ar',
         },
       });
   
-      const responseEn = await fetch(`${API_BASE_URL}/api/Feature/GetAll`, {
-        method: 'GET',
+      const responseEn = await axiosClient.get('/api/Feature/GetAll', {
         headers: {
-          Accept: '*/*',
           'Accept-Language': 'en',
         },
       });
   
-      if (responseAr.ok && responseEn.ok) {
-        const featuresAr = await responseAr.json();
-        const featuresEn = await responseEn.json();
+      if (responseAr.status === 200 && responseEn.status === 200) {
+        const featuresAr = await responseAr.data;
+        const featuresEn = await responseEn.data;
   
         const unifiedFeatures = featuresAr.map((featureAr: { id: string; name: string; description: string }) => {
           const correspondingEn = featuresEn.find((featureEn: { id: string }) => featureEn.id === featureAr.id);
@@ -225,16 +225,14 @@ export default function PlanForm({
   const handleAddFeature = async () => {
     if (validateFeatureInputs()) {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/Feature/Create`, {
-          method: 'POST',
+        const response = await axiosClient.post('/api/Feature/Create', feature, {
           headers: {
             'Content-Type': 'application/json',
             Accept: '*/*',
           },
-          body: JSON.stringify(feature),
         });
 
-        if (response.ok) {
+        if (response.status === 200 || response.status === 201) {
           toast.success(lang === 'ar' ? 'تمت إضافة الميزة!' : 'Feature added!');
 
           const updatedFeatures = await fetchAllFeatures();

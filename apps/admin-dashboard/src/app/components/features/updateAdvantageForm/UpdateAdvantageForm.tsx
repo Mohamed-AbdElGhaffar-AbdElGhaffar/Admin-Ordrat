@@ -12,6 +12,7 @@ import * as Yup from 'yup';
 import { API_BASE_URL } from '@/config/base-url';
 import { Loader } from 'lucide-react';
 import { useFileContext } from '../../context/FileContext';
+import axiosClient from '../../context/api';
 
 type Feature = {
   id: string;
@@ -70,16 +71,14 @@ export default function UpdateAdvantageForm({
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/Feature/Update/${featureId}`, {
-          method: 'PUT',
+        const response = await axiosClient.put(`/api/Feature/Update/${featureId}`, values, {
           headers: {
             'Content-Type': 'application/json',
             Accept: '*/*',
           },
-          body: JSON.stringify(values),
         });
-
-        if (response.ok) {
+     
+        if (response.status === 200 || response.status === 204) {
           toast.success(lang === 'ar' ? 'تم تعديل الميزة بنجاح!' : 'Feature updated successfully!');
           closeModal();
           setUpdateData(true);
@@ -96,25 +95,23 @@ export default function UpdateAdvantageForm({
   const fetchFeatureDetails = async (id: string): Promise<Feature | null> => {
     try {
       const [arResponse, enResponse] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/Feature/GetAll`, {
-          method: 'GET',
+        axiosClient.get('/api/Feature/GetAll', {
           headers: {
             Accept: '*/*',
             'Accept-Language': 'ar',
           },
         }),
-        fetch(`${API_BASE_URL}/api/Feature/GetAll`, {
-          method: 'GET',
+        axiosClient.get('/api/Feature/GetAll', {
           headers: {
             Accept: '*/*',
             'Accept-Language': 'en',
           },
         }),
       ]);
-
-      if (arResponse.ok && enResponse.ok) {
-        const arData = await arResponse.json();
-        const enData = await enResponse.json();
+    
+      if (arResponse.status === 200 && enResponse.status === 200) {
+        const arData = await arResponse.data;
+        const enData = await enResponse.data;
 
         const arFeature = arData.find((feature: { id: string }) => feature.id === id);
         const enFeature = enData.find((feature: { id: string }) => feature.id === id);

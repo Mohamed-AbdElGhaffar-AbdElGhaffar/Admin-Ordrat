@@ -2,101 +2,22 @@
 
 import React, { useEffect, useState } from 'react';
 import { defaultColumns } from './column';
-import TableToolbar from '@/app/shared/tan-table/table-toolbar';
 import MainTable from '@/app/shared/table/main-table';
 import WidgetCard from '@components/cards/widget-card';
-import { Person, Reviews } from '@/data/tan-table-data';
+import { Reviews } from '@/data/tan-table-data';
 import TablePagination from '@/app/shared/table/table-pagination';
 import { useTanStackTable } from '@/app/shared/tan-table/custom-table-components/use-TanStack-Table';
 
 import { Button } from 'rizzui';
 import { PiArrowsClockwiseBold } from 'react-icons/pi';
-import ImportButton from '../../import-button';
-import AddReviewsButton from '../../reviewsAddButtom';
-import TableToolbarFilter from '../table-toolbar-filter';
 import { useFileContext } from '@/app/components/context/FileContext';
 import { API_BASE_URL } from '@/config/base-url';
 import { useGuardContext } from '@/app/components/context/GuardContext';
 import { useRouter } from 'next/navigation';
-// import TablePagination from '@/app/shared/table/table-pagination-test';
-// import AddButton from '../../planAddButtom';
+import TableToolbarFilter from '../table-toolbar-filter-final';
+import axiosClient from '@/app/components/context/api';
 
 export default function ReviewsTable({lang = "en"}:{lang?:string;}) {
-//   const defaultData: Reviews[] = [
-//     {
-//         id: '0',
-//         name: lang === 'ar' ? 'علي محمد' : 'Ali Mohamed',
-//         userName: lang === 'ar' ? 'علي م.' : 'Ali M.',
-//         phoneNumber: '+201234567890',
-//         email: 'ali.mohamed@example.com',
-//         shop: lang === 'ar' ? 'متجر الإلكترونيات' : 'Electronics Shop',
-//         comment: lang === 'ar' ? 'خدمة رائعة وجودة عالية.' : 'Great service and high quality.',
-//         evaluation: '5',
-//     },
-//     {
-//         id: '1',
-//         name: lang === 'ar' ? 'سارة عبد الله' : 'Sara Abdallah',
-//         userName: lang === 'ar' ? 'سارة ع.' : 'Sara A.',
-//         phoneNumber: '+201298765432',
-//         email: 'sara.abdallah@example.com',
-//         shop: lang === 'ar' ? 'متجر الأزياء' : 'Fashion Boutique',
-//         comment: lang === 'ar' ? 'التصاميم عصرية والمنتجات ممتازة.' : 'Trendy designs and excellent products.',
-//         evaluation: '4',
-//     },
-//     {
-//         id: '2',
-//         name: lang === 'ar' ? 'خالد حسن' : 'Khaled Hassan',
-//         userName: lang === 'ar' ? 'خالد ح.' : 'Khaled H.',
-//         phoneNumber: '+201234654321',
-//         email: 'khaled.hassan@example.com',
-//         shop: lang === 'ar' ? 'محل الأدوات المنزلية' : 'Home Goods Store',
-//         comment: lang === 'ar' ? 'مجموعة متنوعة وأسعار معقولة.' : 'Wide variety and reasonable prices.',
-//         evaluation: '4',
-//     },
-//     {
-//         id: '3',
-//         name: lang === 'ar' ? 'مها عادل' : 'Maha Adel',
-//         userName: lang === 'ar' ? 'مها ع.' : 'Maha A.',
-//         phoneNumber: '+201245678910',
-//         email: 'maha.adel@example.com',
-//         shop: lang === 'ar' ? 'متجر الكتب' : 'Bookstore',
-//         comment: lang === 'ar' ? 'مجموعة رائعة من الكتب.' : 'Great collection of books.',
-//         evaluation: '5',
-//     },
-//     {
-//         id: '4',
-//         name: lang === 'ar' ? 'ياسمين علي' : 'Yasmin Ali',
-//         userName: lang === 'ar' ? 'ياسمين ع.' : 'Yasmin A.',
-//         phoneNumber: '+201287654321',
-//         email: 'yasmin.ali@example.com',
-//         shop: lang === 'ar' ? 'متجر الأثاث' : 'Furniture Store',
-//         comment: lang === 'ar' ? 'الخدمة ممتازة والتوصيل سريع.' : 'Excellent service and fast delivery.',
-//         evaluation: '5',
-//     },
-//     {
-//         id: '5',
-//         name: lang === 'ar' ? 'عمرو السيد' : 'Amr Elsayed',
-//         userName: lang === 'ar' ? 'عمرو س.' : 'Amr S.',
-//         phoneNumber: '+201236547890',
-//         email: 'amr.elsayed@example.com',
-//         shop: lang === 'ar' ? 'متجر الأدوات الرياضية' : 'Sports Store',
-//         comment: lang === 'ar' ? 'الأسعار مرتفعة قليلاً ولكن الجودة ممتازة.' : 'Prices are a bit high, but quality is great.',
-//         evaluation: '4',
-//     },
-//     {
-//         id: '6',
-//         name: lang === 'ar' ? 'نورا حامد' : 'Noura Hamed',
-//         userName: lang === 'ar' ? 'نورا ح.' : 'Noura H.',
-//         phoneNumber: '+201245678911',
-//         email: 'noura.hamed@example.com',
-//         shop: lang === 'ar' ? 'متجر العطور' : 'Perfume Shop',
-//         comment: lang === 'ar' ? 'روائح رائعة وخيارات متعددة.' : 'Amazing scents and a wide variety.',
-//         evaluation: '5',
-//     },
-// ];
-
-  // Moved states here
-  
   const [inputFromTo, setInputFromTo] = useState<string[]>(['', '']);
   const [inputEndUserName, setInputEndUserName] = useState('');
   const [inputEndUserPhoneNumber, setInputEndUserPhoneNumber] = useState('');
@@ -106,7 +27,6 @@ export default function ReviewsTable({lang = "en"}:{lang?:string;}) {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [totalPages, setTotalPages] = useState(5);
-  // const totalPages = 5;
 
   const options = [
     { value: 5, label: '5' },
@@ -193,16 +113,17 @@ export default function ReviewsTable({lang = "en"}:{lang?:string;}) {
     });
   
     try {
-      const response = await fetch(`${API_BASE_URL}/api/Review/Filter?${queryParams}`, {
-        method: 'GET',
+      const response = await axiosClient.get('/api/Review/Filter', {
+        params: queryParams,
         headers: {
           Accept: '*/*',
           'Accept-Language': lang,
         },
       });
   
-      if (response.ok) {
-        const result = await response.json();
+      // Handle the response data
+      if (response.status === 200) {
+        const result = await response.data;
   
         // Transforming API data to match `defaultData` structure
         const transformedData = result.entities.map((review: any) => ({
@@ -214,6 +135,7 @@ export default function ReviewsTable({lang = "en"}:{lang?:string;}) {
           shop: review.shopName,
           comment: review.reviewText,
           evaluation: review.rate.toString(),
+          createdAt: review.createdAt
         }));
   
         setDefaultData(transformedData);
@@ -258,20 +180,38 @@ export default function ReviewsTable({lang = "en"}:{lang?:string;}) {
             </Button>
         </div>
         <TableToolbarFilter
-          nameEN="Reviews"
-          nameAr="المراجعات"
+          nameEN="Reviews End User"
+          nameAr="مراجعات المستخدم"
           table={table}
           lang={lang}
-          inputFromTo={inputFromTo}
-          setInputFromTo={setInputFromTo}
-          inputEndUserName={inputEndUserName}
-          setInputEndUserName={setInputEndUserName}
-          inputEndUserPhoneNumber={inputEndUserPhoneNumber}
-          setInputEndUserPhoneNumber={setInputEndUserPhoneNumber}
-          inputShopName={inputShopName}
-          setInputShopName={setInputShopName}
-          createdDate={createdDate}
-          setCreatedDate={setCreatedDate}
+          search={inputEndUserName}
+          setSearch={setInputEndUserName}
+          filters={[
+            {
+              type: 'input',
+              value: inputEndUserPhoneNumber,
+              setValue: setInputEndUserPhoneNumber,
+              placeholder: lang === 'ar' ? 'رقم الهاتف' : 'Phone Number',
+            },
+            {
+              type: 'input',
+              value: inputShopName,
+              setValue: setInputShopName,
+              placeholder: lang === 'ar' ? "اسم المتجر" : "Shop Name",
+            },
+            {
+              type: 'fromTo',
+              value: inputFromTo,
+              setValue: setInputFromTo,
+              label: lang === 'ar' ? "التقييم" : "Rate",
+            },
+            {
+              type: 'date',
+              value: createdDate,
+              setValue: setCreatedDate,
+            },
+          ]}
+          onSuccess={()=>setUpdateReviews(true)}
         />
         <MainTable table={table} variant={'modern'} lang={lang} />
         <TablePagination options={options} table={table} lang={lang} pageIndex={pageIndex} totalPages={totalPages} setPageIndex={setPageIndex} setPageSize={setPageSize} setUpdate={setUpdateReviews} />

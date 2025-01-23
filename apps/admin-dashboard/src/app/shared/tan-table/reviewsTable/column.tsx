@@ -91,16 +91,16 @@ export const defaultColumns = (lang: string) => [
       </Text>
     ),
   }),
-  columnHelper.accessor('email', {
-    id: 'email',
-    size: 240,
-    header: lang === 'ar' ? 'البريد الالكتروني' : 'Email',
-    cell: ({ row }) => (
-      <Text className="font-lexend text-sm font-medium text-gray-900 dark:text-gray-700">
-        {row.original.email}
-      </Text>
-    ),
-  }),
+  // columnHelper.accessor('email', {
+  //   id: 'email',
+  //   size: 240,
+  //   header: lang === 'ar' ? 'البريد الالكتروني' : 'Email',
+  //   cell: ({ row }) => (
+  //     <Text className="font-lexend text-sm font-medium text-gray-900 dark:text-gray-700">
+  //       {row.original.email}
+  //     </Text>
+  //   ),
+  // }),
   columnHelper.accessor('shop', {
     id: 'shop',
     size: 240,
@@ -131,31 +131,12 @@ export const defaultColumns = (lang: string) => [
       </Text>
     ),
   }),
-  // columnHelper.accessor('dueDate', {
-  //   id: 'dueDate',
-  //   size: 200,
-  //   header: 'Due Date',
-  //   filterFn: 'dueDate' as any,
-  //   cell: ({ row }) => <DateCell date={new Date(row.original.createdAt)} />,
-  // }),
-  // columnHelper.accessor('amount', {
-  //   id: 'amount',
-  //   size: 140,
-  //   header: 'Amount',
-  //   filterFn: 'priceFilter' as any,
-  //   cell: ({ row }) => (
-  //     <Text className="font-medium text-gray-700 dark:text-gray-600">
-  //       ${row.original.amount}
-  //     </Text>
-  //   ),
-  // }),
-  // columnHelper.accessor('status', {
-  //   id: 'status',
-  //   size: 140,
-  //   header: 'Status',
-  //   filterFn: 'statusFilter' as any,
-  //   cell: (info) => getStatusBadge(info.renderValue()!),
-  // }),
+  columnHelper.accessor('createdAt', {
+    id: 'createdAt',
+    size: 200,
+    header: lang === 'ar' ? 'تاريخ الإنشاء' : 'Created Date',
+    cell: ({ row }) => <DateCell date={new Date(row.original.createdAt)} lang={lang} />,
+  }),
   columnHelper.accessor('userName', {
     id: 'userName',
     size: 160,

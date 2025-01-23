@@ -18,6 +18,7 @@ import { useFileContext } from '@/app/components/context/FileContext';
 import { useGuardContext } from '@/app/components/context/GuardContext';
 import { useRouter } from 'next/navigation';
 import FaqsAddButton from '../../faqAddButtom';
+import axiosClient from '@/app/components/context/api';
 
 export default function FaqTable({lang = "en"}:{lang?:string;}) {
   const [defaultData, setDefaultData] = useState<Faq[]>([]);
@@ -45,13 +46,13 @@ export default function FaqTable({lang = "en"}:{lang?:string;}) {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/FAQCategory/GetOrdratFAQs`, {
-        method: 'GET',
+      const response = await axiosClient.get('/api/FAQCategory/GetOrdratFAQs', {
         headers: {
           'Accept-Language': lang,
         },
       });
-      const data = await response.json();
+  
+      const data = response.data;
 
       const transformedData = data.map((item: any) => ({
         id: item.id,

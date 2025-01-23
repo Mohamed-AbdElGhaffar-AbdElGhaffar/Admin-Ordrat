@@ -12,6 +12,7 @@ import * as Yup from 'yup';
 import { API_BASE_URL } from '@/config/base-url';
 import { Loader } from 'lucide-react';
 import { useFileContext } from '../../context/FileContext';
+import axiosClient from '../../context/api';
 
 type Feature = {
   id: string;
@@ -94,17 +95,17 @@ export default function UpdatePlanForm({
     setLoading(true); 
     try {
       const [responseAr, responseEn] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/Plan/GetById/${planId}`, {
+        axiosClient.get(`/api/Plan/GetById/${planId}`, {
           headers: { 'Accept-Language': 'ar' },
         }),
-        fetch(`${API_BASE_URL}/api/Plan/GetById/${planId}`, {
+        axiosClient.get(`/api/Plan/GetById/${planId}`, {
           headers: { 'Accept-Language': 'en' },
         }),
       ]);
-
-      if (responseAr.ok && responseEn.ok) {
-        const dataAr = await responseAr.json();
-        const dataEn = await responseEn.json();
+      
+      if (responseAr.status === 200 && responseEn.status === 200) {
+        const dataAr = responseAr.data;
+        const dataEn = responseEn.data;
 
         setInitialValues({
           nameAr: dataAr.name,
@@ -169,16 +170,14 @@ export default function UpdatePlanForm({
           planFeatures: selectedFeatures.map((feature) => feature.id),
         };
 
-        const response = await fetch(`${API_BASE_URL}/api/Plan/Update/${planId}`, {
-          method: 'PUT',
+        const response = await axiosClient.put(`/api/Plan/Update/${planId}`, requestPayload, {
           headers: {
             'Content-Type': 'application/json',
             Accept: '*/*',
           },
-          body: JSON.stringify(requestPayload),
         });
-
-        if (response.ok) {
+    
+        if (response.status === 200 || response.status === 204) {
           toast.success(lang === 'ar' ? 'تم تعديل الخطة بنجاح!' : 'Plan updated successfully!');
           setUpdateData(true);
           closeModal();
@@ -229,25 +228,21 @@ export default function UpdatePlanForm({
 
   const fetchAllFeatures = async () => {
     try {
-      const responseAr = await fetch(`${API_BASE_URL}/api/Feature/GetAll`, {
-        method: 'GET',
+      const responseAr = await axiosClient.get('/api/Feature/GetAll', {
         headers: {
-          Accept: '*/*',
           'Accept-Language': 'ar',
         },
       });
   
-      const responseEn = await fetch(`${API_BASE_URL}/api/Feature/GetAll`, {
-        method: 'GET',
+      const responseEn = await axiosClient.get('/api/Feature/GetAll', {
         headers: {
-          Accept: '*/*',
           'Accept-Language': 'en',
         },
       });
   
-      if (responseAr.ok && responseEn.ok) {
-        const featuresAr = await responseAr.json();
-        const featuresEn = await responseEn.json();
+      if (responseAr.status === 200 && responseEn.status === 200) {
+        const featuresAr = await responseAr.data;
+        const featuresEn = await responseEn.data;
   
         const unifiedFeatures = featuresAr.map((featureAr: { id: string; name: string; description: string }) => {
           const correspondingEn = featuresEn.find((featureEn: { id: string }) => featureEn.id === featureAr.id);
@@ -281,16 +276,14 @@ export default function UpdatePlanForm({
   const handleAddFeature = async () => {
     if (validateFeatureInputs()) {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/Feature/Create`, {
-          method: 'POST',
+        const response = await axiosClient.post('/api/Feature/Create', feature, {
           headers: {
             'Content-Type': 'application/json',
             Accept: '*/*',
           },
-          body: JSON.stringify(feature),
         });
 
-        if (response.ok) {
+        if (response.status === 200 || response.status === 201) {
           toast.success(lang === 'ar' ? 'تمت إضافة الميزة!' : 'Feature added!');
 
           const updatedFeatures = await fetchAllFeatures();

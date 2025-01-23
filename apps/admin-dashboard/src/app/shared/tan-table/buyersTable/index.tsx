@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { defaultColumns } from './column';
-import TableToolbar from '@/app/shared/tan-table/table-toolbar';
 import MainTable from '@/app/shared/table/main-table';
 import WidgetCard from '@components/cards/widget-card';
 import { Buyers } from '@/data/tan-table-data';
@@ -13,10 +12,10 @@ import { Button } from 'rizzui';
 import { PiArrowsClockwiseBold } from 'react-icons/pi';
 import TableToolbarFilterBuyers from '../table-toolbar-filter-buyers';
 import { useFileContext } from '@/app/components/context/FileContext';
-import { API_BASE_URL } from '@/config/base-url';
 import { useGuardContext } from '@/app/components/context/GuardContext';
 import { useRouter } from 'next/navigation';
-// import AddButton from '../../planAddButtom';
+import axiosClient from '@/app/components/context/api';
+import TableToolbarFilter from '../table-toolbar-filter-final';
 
 export default function BuyersTable({lang = "en"}:{lang?:string;}) {
 //   const defaultData: Buyers[] = [
@@ -141,20 +140,12 @@ export default function BuyersTable({lang = "en"}:{lang?:string;}) {
           return true;
         },
       },
-      meta: {
-        // handleDeleteRow: (row) => {
-        //   setData((prev) => prev.filter((r) => r.id !== row.id));
-        // },
-        // handleMultipleDelete: (rows) => {
-        //   setData((prev) => prev.filter((r) => !rows.includes(r.id)));
-        //   table.resetRowSelection();
-        // },
-      },
+      meta: {},
       enableColumnResizing: false,
     },
   });
 
-  const fetchReviews = async () => {
+  const fetchBuyers = async () => {
     const formatDate = (date: Date | null): string => {
       return date ? date.toISOString().split('T')[0] : '';
     };
@@ -170,17 +161,18 @@ export default function BuyersTable({lang = "en"}:{lang?:string;}) {
     });
   
     try {
-      const response = await fetch(`${API_BASE_URL}/api/EndUser/Filter?${queryParams}`, {
-        method: 'GET',
+      const response = await axiosClient.get('/api/EndUser/Filter', {
+        params: queryParams,
         headers: {
           Accept: '*/*',
           'Accept-Language': lang,
         },
       });
   
-      if (response.ok) {
-        const result = await response.json();
-  
+      // Handle the response data
+      if (response.status === 200) {
+        const result = response.data;
+    
         // Transforming API data to match `defaultData` structure
         const transformedData = result.entities.map((buyer: any) => ({
           id: buyer.id,
@@ -211,7 +203,7 @@ export default function BuyersTable({lang = "en"}:{lang?:string;}) {
   };  
 
   useEffect(() => {
-    fetchReviews();
+    fetchBuyers();
   }, [setData, lang]); 
 
   useEffect(() => {
@@ -222,7 +214,7 @@ export default function BuyersTable({lang = "en"}:{lang?:string;}) {
   }, [updateBuyers]); 
 
   const handleRefreshData = () => {
-    fetchReviews();
+    fetchBuyers();
   };
 
   return (
@@ -234,19 +226,33 @@ export default function BuyersTable({lang = "en"}:{lang?:string;}) {
               {lang == "en"?"Update Data":'تحديث البيانات'}
             </Button>
         </div>
-        <TableToolbarFilterBuyers 
+        <TableToolbarFilter
           nameEN="Buyers" 
           nameAr="المشتريين" 
-          table={table}  
+          table={table}
           lang={lang}
-          inputName={inputName}
-          setInputName={setInputName}
-          inputPhoneNumber={inputPhoneNumber}
-          setInputPhoneNumber={setInputPhoneNumber}
-          inputShopName={inputShopName}
-          setInputShopName={setInputShopName}
-          createdDate={createdDate}
-          setCreatedDate={setCreatedDate}
+          search={inputName}
+          setSearch={setInputName}
+          filters={[
+            {
+              type: 'input',
+              value: inputPhoneNumber,
+              setValue: setInputPhoneNumber,
+              placeholder: lang === 'ar' ? 'رقم الهاتف' : 'Phone Number',
+            },
+            {
+              type: 'input',
+              value: inputShopName,
+              setValue: setInputShopName,
+              placeholder: lang === 'ar' ? "اسم المتجر" : "Shop Name",
+            },
+            {
+              type: 'date',
+              value: createdDate,
+              setValue: setCreatedDate,
+            },
+          ]}
+          onSuccess={()=>setUpdateBuyers(true)}
         />
         <MainTable table={table} variant={'modern'} lang={lang} />
         <TablePagination options={options} table={table} lang={lang} pageIndex={pageIndex} totalPages={totalPages} setPageIndex={setPageIndex} setPageSize={setPageSize} setUpdate={setUpdateBuyers} />

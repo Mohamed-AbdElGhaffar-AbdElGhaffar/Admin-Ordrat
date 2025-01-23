@@ -24,6 +24,7 @@ import { useTranslation } from '@/app/i18n/client';
 import { API_BASE_URL } from '@/config/base-url';
 import { useEffect, useState } from 'react';
 import { Loader } from 'lucide-react';
+import axiosClient from '@/app/components/context/api';
 
 type AppointmentStatsType = {
   className?: string;
@@ -180,10 +181,11 @@ export function StatGrid({ lang }:{ lang? : string} ) {
     },
     {
       title: 'number-of-delivery-drivers',
-      amount: '8,503',
+      amount: '',
       increased: false,
       percentage: '32.40',
       icon: PiMotorcycle,
+      loading: true,
     },
     {
       title: 'number-of-merchants',
@@ -205,11 +207,12 @@ export function StatGrid({ lang }:{ lang? : string} ) {
   useEffect(() => {
     const fetchNumberOfMerchants = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/AdminStatistics/GetTotalSellers`, {
+        const response = await axiosClient.get('/api/AdminStatistics/GetTotalSellers', {
           headers: { 'Accept-Language': lang || 'en' },
         });
-        if (response.ok) {
-          const { numberOfSellers } = await response.json();
+    
+        if (response.status === 200) {
+          const { numberOfSellers } = await response.data;
           setStatData((prevData) =>
             prevData.map((stat) =>
               stat.title === 'number-of-merchants'
@@ -220,12 +223,35 @@ export function StatGrid({ lang }:{ lang? : string} ) {
         } else {
           console.error('Failed to fetch number of merchants');
         }
-      } catch (error) {
-        console.error('Error fetching number of merchants:', error);
+      } catch (error: any) {
+        console.error('Error fetching number of merchants:', error.response || error.message);
+      }
+    };
+    const fetchNumberOfDelivery = async () => {
+      try {
+        const response = await axiosClient.get('/api/AdminStatistics/GetOrdratTotalDeliveries', {
+          headers: { 'Accept-Language': lang || 'en' },
+        });
+    
+        if (response.status === 200) {
+          const { numberOfOrdratDeliveries } = response.data;
+          setStatData((prevData) =>
+            prevData.map((stat) =>
+              stat.title === 'number-of-delivery-drivers'
+                ? { ...stat, amount: numberOfOrdratDeliveries.toString(), loading: false }
+                : stat
+            )
+          );
+        } else {
+          console.error('Failed to fetch number of merchants');
+        }
+      } catch (error: any) {
+        console.error('Error fetching number of merchants:', error.response || error.message);
       }
     };
 
     fetchNumberOfMerchants();
+    fetchNumberOfDelivery();
   }, [lang]);
 
   return (

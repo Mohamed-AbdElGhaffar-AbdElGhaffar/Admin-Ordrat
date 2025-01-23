@@ -17,6 +17,7 @@ import { API_BASE_URL } from '@/config/base-url';
 import { useFileContext } from '@/app/components/context/FileContext';
 import { useGuardContext } from '@/app/components/context/GuardContext';
 import { useRouter } from 'next/navigation';
+import axiosClient from '@/app/components/context/api';
 
 export default function PlanTable({lang = "en"}:{lang?:string;}) {
   const [defaultData, setDefaultData] = useState<Person[]>([]);
@@ -74,13 +75,12 @@ export default function PlanTable({lang = "en"}:{lang?:string;}) {
   // Fetch data from the API and transform it to match the `Person` type
   const fetchData = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/Plan/GetAll`, {
-        method: 'GET',
+      const response = await axiosClient.get('/api/Plan/GetAll', {
         headers: {
           'Accept-Language': lang,
         },
       });
-      const data = await response.json();
+      const data = await response.data;
 
       const transformedData = data.map((plan: any) => ({
         id: plan.id,

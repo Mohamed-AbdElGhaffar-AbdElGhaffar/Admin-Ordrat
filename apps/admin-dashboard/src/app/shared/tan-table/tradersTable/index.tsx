@@ -19,6 +19,7 @@ import { API_BASE_URL } from '@/config/base-url';
 import TableToolbarFilterTraders from '../table-toolbar-filter-traders';
 import { useGuardContext } from '@/app/components/context/GuardContext';
 import { useRouter } from 'next/navigation';
+import axiosClient from '@/app/components/context/api';
 
 export default function TradersTable({lang = "en"}:{lang?:string;}) {
   // const defaultData: Traders[] = [
@@ -173,17 +174,16 @@ export default function TradersTable({lang = "en"}:{lang?:string;}) {
     });
   
     try {
-      const response = await fetch(`${API_BASE_URL}/api/Seller/Filter?${queryParams}`, {
-        method: 'GET',
+      const response = await axiosClient.get('/api/Seller/Filter', {
+        params: queryParams,
         headers: {
-          Accept: '*/*',
           'Accept-Language': lang,
         },
       });
   
-      if (response.ok) {
-        const result = await response.json();
-  
+      
+      if (response.status === 200) {
+        const result = response.data;  
         // Transforming API data to match `defaultData` structure
         const transformedData = result.entities.map((seller: any) => ({
           id: seller.id,

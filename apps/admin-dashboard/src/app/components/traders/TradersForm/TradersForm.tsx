@@ -10,6 +10,7 @@ import styles from './TradersForm.module.css';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { API_BASE_URL } from '@/config/base-url';
+import axiosClient from '../../context/api';
 
 type Address = {
   city: string;
@@ -98,17 +99,15 @@ export default function TradersForm({
     validationSchema: mainFormSchema,
     onSubmit: async (values) => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/Seller/Create`, {
-          method: 'POST',
+        const response = await axiosClient.post('/api/Seller/Create', values, {
           headers: {
             'Content-Type': 'application/json',
             'Accept-Language': lang || 'en',
           },
-          body: JSON.stringify(values),
         });
 
-        if (response.ok) {
-          const result = await response.json();
+        if (response.status === 200 || response.status === 201) {
+          const result = await response.data;
           toast.success(lang === 'ar' ? 'تم إضافة التاجر بنجاح!' : 'Seller added successfully!');
           console.log(result.message);
           mainFormik.resetForm();
@@ -116,7 +115,7 @@ export default function TradersForm({
           // console.log("Selected Addresses:", selectedAddresses);
           closeModal();
         } else {
-          const error = await response.json();
+          const error = await response.data;
           toast.error(error.message || (lang === 'ar' ? 'فشل في الإضافة' : 'Failed to add seller'));
         }
       } catch (error) {

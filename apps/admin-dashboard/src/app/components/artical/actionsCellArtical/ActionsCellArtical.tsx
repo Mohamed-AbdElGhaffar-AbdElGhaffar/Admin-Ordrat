@@ -16,7 +16,7 @@ interface ActionsCellProps {
 
 const ActionsCellArtical: React.FC<ActionsCellProps> = ({ row, lang, view = false }) => {    
   const { openModal } = useModal();
-  const { setUpdateArtical } = useFileContext();
+  const { setUpdateArtical } = useFileContext();  
 
   const handleOpenModal = () => {
     openModal({
@@ -27,7 +27,7 @@ const ActionsCellArtical: React.FC<ActionsCellProps> = ({ row, lang, view = fals
 
   const handleDeleteFAQ = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/Article/Delete/${row.id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/Article/Delete/${row.original.id}`, {
         method: 'DELETE',
         headers: {
           Accept: '*/*',

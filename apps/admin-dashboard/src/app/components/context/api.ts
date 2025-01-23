@@ -32,6 +32,8 @@ axiosClient.interceptors.response.use(
 
         if (!refreshToken) {
           window.location.href = '/signin';
+          console.log("error");
+
           throw new Error('Refresh token not found.');
         }
 
@@ -43,6 +45,8 @@ axiosClient.interceptors.response.use(
         if (refreshResponse.status === 401) {
           localStorage.clear();
           window.location.href = '/signin';
+          console.log("error");
+          
         }
         console.log("refreshResponse.data.token: ",refreshResponse);
         const { setGuard } = useGuardContext();
@@ -51,11 +55,13 @@ axiosClient.interceptors.response.use(
         localStorage.setItem('userData',  refreshResponse.data);
         localStorage.setItem('role', refreshResponse.data.roles[0]);
         originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.accessToken}`;
+        console.log("not error");
         return axiosClient(originalRequest);
       } catch (refreshError) {
         console.error('Token refresh failed:', refreshError);
         localStorage.clear();
         window.location.href = '/signin';
+        console.log("error");
         return Promise.reject(refreshError);
       }
     }

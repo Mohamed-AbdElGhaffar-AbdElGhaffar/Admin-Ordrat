@@ -17,6 +17,7 @@ import { useFileContext } from '@/app/components/context/FileContext';
 import { API_BASE_URL } from '@/config/base-url';
 import { useGuardContext } from '@/app/components/context/GuardContext';
 import { useRouter } from 'next/navigation';
+import axiosClient from '@/app/components/context/api';
 
 export default function StoresTable({lang = "en"}:{lang?:string;}) {
   // const defaultData: Stores[] = [
@@ -174,16 +175,16 @@ export default function StoresTable({lang = "en"}:{lang?:string;}) {
     queryParams.append('paginateParams.PageSize', pageSize.toString());
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/Shop/GetAll?${queryParams.toString()}`, {
-        method: 'GET',
+      const response = await axiosClient.get('/api/Shop/GetAll', {
+        params: queryParams,
         headers: {
           Accept: '*/*',
           'Accept-Language': lang,
         },
       });
-
-      if (response.ok) {
-        const result = await response.json();
+  
+      if (response.status === 200) {
+        const result = response.data;
 
         const transformedData = result.entities.map((store: any) => ({
           id: store.id,
