@@ -1,6 +1,6 @@
 'use client';
 
-import { PiXBold, PiPlusBold, PiMinusBold } from 'react-icons/pi';
+import { PiXBold, PiPlusBold, PiMinusBold, PiTrashBold, PiUploadSimple } from 'react-icons/pi';
 import React, { useEffect, useState } from 'react';
 import { ActionIcon, Title, Button, Input, Textarea } from 'rizzui';
 import { useModal } from '@/app/shared/modal-views/use-modal';
@@ -12,8 +12,10 @@ import { Loader } from 'lucide-react';
 import 'react-datepicker/dist/react-datepicker.css';
 import axiosClient from '../../context/api';
 import FileUpload from '@/app/shared/image-form-upload';
+import Image from 'next/image';
 
 type Sections = {
+  image: File | null;
   titleAr: string;
   titleEn: string;
   contentAr: string;
@@ -35,6 +37,7 @@ export default function AddArticalForm({
 }: AddArticalFormProps) {
   const { closeModal } = useModal();
   
+
   const [sections, setSections] = useState<Sections[]>([]);
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState<File | null>(null);
@@ -59,6 +62,9 @@ export default function AddArticalForm({
     contentAr: lang === 'ar' ? "المحتوى (عربي)" : "content (Arabic)",
     additionalInfoEn: lang === 'ar' ? "معلومات اضافية (انجليزي)" : "Additional Info (English)",
     additionalInfoAr: lang === 'ar' ? "معلومات اضافية (عربي)" : "Additional Info (Arabic)",
+    images: lang === 'ar' ? 'الصور' : 'Images',
+    addImages: lang === 'ar' ? 'الصورة' : 'Image',
+
     submit: lang === 'ar' ? 'انشاء' : 'Create',
   };
   
@@ -119,10 +125,15 @@ export default function AddArticalForm({
         formData.append(`Sections[${index}].contentAr`, section.contentAr);
         formData.append(`Sections[${index}].additionalInfoEn`, section.additionalInfoEn);
         formData.append(`Sections[${index}].additionalInfoAr`, section.additionalInfoAr);
+        if (section.image) {
+          formData.append(`Sections[${index}].image`, section.image);
+        }
       });
       if (values.image) {
         formData.append('Image', values.image);
       }
+      console.log("sections: ",sections);
+      
       try {
         const response = await axiosClient.post('/api/Article/Create', formData);
 
@@ -142,13 +153,28 @@ export default function AddArticalForm({
     },
   });
 
-  const handleAddSections = () => setSections([...sections, { titleEn: '', titleAr: '', contentEn: '', contentAr: '', additionalInfoEn: '', additionalInfoAr: '' }]);
+  const handleAddSections = () => setSections([...sections, { titleEn: '', titleAr: '', contentEn: '', contentAr: '', additionalInfoEn: '', additionalInfoAr: '', image: null, }]);
   
   const handleRemoveSections = (index: number) => setSections(sections.filter((_, i) => i !== index));
   const handleSectionsChange = (index: number, field: 'titleEn' | 'titleAr' | 'contentEn' | 'contentAr' | 'additionalInfoEn' | 'additionalInfoAr', value: string) => {
     const updatedSections = [...sections];
     updatedSections[index][field] = value;
     setSections(updatedSections);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const updatedPictures = [...sections];
+      updatedPictures[index].image = file;
+      setSections(updatedPictures);
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const updatedPictures = [...sections];
+    updatedPictures[index].image = null;
+    setSections(updatedPictures);
   };
 
   if (loading) {
@@ -250,6 +276,55 @@ export default function AddArticalForm({
                       onChange={(e) => handleSectionsChange(index, 'additionalInfoAr', e.target.value)}
                     />
                   </div>
+                    <div className="">
+                      <div className='flex flex-col md:flex-row gap-4 mb-3'>
+                        {section.image ? (
+                          <></>
+                        ) : (
+                          <label className="w-fit cursor-pointer bg-gray-100 border border-gray-300 rounded-md px-6 md:px-3 py-2 text-sm">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => handleImageUpload(e, index)}
+                            />
+                            <PiUploadSimple className="w-4 h-4 text-gray-600" />
+                          </label>
+                        )}
+                      </div>
+                      <div className="flex justify-center items-center gap-4">
+                        {section.image && (
+                          <div
+                            className="flex min-h-[58px] w-full items-center rounded-xl border border-muted px-3 dark:border-gray-300"
+                          >
+                            <div className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-muted bg-gray-50 object-cover px-2 py-1.5 dark:bg-transparent">
+                              {section.image instanceof File && section.image.type.includes('image') ? (
+                                <Image
+                                  src={URL.createObjectURL(section.image)}
+                                  fill
+                                  className="object-contain"
+                                  priority
+                                  alt={section.image.name}
+                                  sizes="(max-width: 768px) 100vw"
+                                />
+                              ) : (
+                                <span className="text-gray-400">No Image</span>
+                              )}
+                            </div>
+                            <div className="truncate px-2.5">{section.image?.name || 'No file selected'}</div>
+                            <ActionIcon
+                              onClick={() => handleRemoveImage(index)}
+                              size="sm"
+                              variant="flat"
+                              color="danger"
+                              className="ms-auto flex-shrink-0 p-0 dark:bg-red-dark/20"
+                            >
+                              <PiTrashBold className="w-6" />
+                            </ActionIcon>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   <button
                     type="button"
                     title={`${lang === 'ar'? 'حذف':'remove'}`}

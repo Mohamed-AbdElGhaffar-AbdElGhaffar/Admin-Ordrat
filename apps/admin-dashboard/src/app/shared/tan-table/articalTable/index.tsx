@@ -94,6 +94,8 @@ export default function ArticalTable({lang = "en"}:{lang?:string;}) {
       );
 
       const result = response.data;
+      console.log("result: ",result);
+      
 
       const transformedData = result.entities.map((item: any) => ({
         id: item.id,
