@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { PiXBold, PiPlusBold, PiMinusBold } from 'react-icons/pi';
 import React, { useEffect, useState } from 'react';
 import { ActionIcon, Title, Button, Input, Textarea } from 'rizzui';
@@ -11,6 +12,10 @@ import * as Yup from 'yup';
 import { Loader } from 'lucide-react';
 import 'react-datepicker/dist/react-datepicker.css';
 import axiosClient from '../../context/api';
+
+const QuillEditor = dynamic(() => import('@ui/quill-editor'), {
+  ssr: false,
+});
 
 type FAQ = {
   id?: string;
@@ -282,8 +287,49 @@ export default function UpdateFAQForm({
                       onChange={(e) => handleFaqChange(index, 'questionAr', e.target.value)}
                     />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                    <Textarea
+                  <div className="flex flex-col gap-4 mb-3 rtl:ltr">
+                  {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3"> */}
+                  <QuillEditor
+                      value={faq.answerEn}
+                      placeholder={`${text.AnswerEn} ${lang === 'ar' ? ' السؤال رقم' : 'question number '} ${index + 1}`}
+                      onChange={(value) => {
+                        console.log("value: ", value);
+                        handleFaqChange(index, 'answerEn', value);
+                      }}
+                      className={`@3xl:col-span-2 [&>.ql-container_.ql-editor]:min-h-[100px]`}
+                      labelClassName="font-medium text-gray-700 dark:text-gray-600 mb-1.5"
+                      modules={{
+                        toolbar: [
+                          [{ direction: 'rtl' }],
+                          ['bold', 'italic', 'underline', 'strike'],
+                          [{ list: 'ordered' }, { list: 'bullet' }],
+                          [{ align: [] }],
+                          [{ color: [] }, { background: [] }],
+                          ['clean']
+                        ]
+                      }}
+                    />
+                    <QuillEditor
+                      value={faq.answerAr}
+                      placeholder={`${text.AnswerAr} ${lang === 'ar' ? ' السؤال رقم' : 'question number '} ${index + 1}`}
+                      onChange={(value) => {
+                        console.log("valueAr: ", value);
+                        handleFaqChange(index, 'answerAr', value);
+                      }}
+                      className={`@3xl:col-span-2 [&>.ql-container_.ql-editor]:min-h-[100px]`}
+                      labelClassName="font-medium text-gray-700 dark:text-gray-600 mb-1.5"
+                      modules={{
+                        toolbar: [
+                          [{ direction: 'rtl' }],
+                          ['bold', 'italic', 'underline', 'strike'],
+                          [{ list: 'ordered' }, { list: 'bullet' }],
+                          [{ align: [] }],
+                          [{ color: [] }, { background: [] }],
+                          ['clean']
+                        ]
+                      }}
+                    />
+                    {/* <Textarea
                       value={faq.answerEn}
                       placeholder={`${text.AnswerEn} ${lang === 'ar'? ' السؤال رقم':'question number '} ${index+1}`}
                       onChange={(e) => handleFaqChange(index, 'answerEn', e.target.value)}
@@ -294,7 +340,7 @@ export default function UpdateFAQForm({
                       placeholder={`${text.AnswerAr} ${lang === 'ar'? ' السؤال رقم':'question number '} ${index+1}`}
                       onChange={(e) => handleFaqChange(index, 'answerAr', e.target.value)}
                       className='flex-1'
-                    />
+                    /> */}
                   </div>
                   <button
                     type="button"

@@ -4,6 +4,8 @@ import cn from '../utils/class-names';
 import 'react-quill/dist/quill.snow.css';
 
 interface QuillEditorProps extends ReactQuillProps {
+  lang?: string;
+  modules?: any;
   error?: string;
   label?: React.ReactNode;
   className?: string;
@@ -20,9 +22,10 @@ export default function QuillEditor({
   labelClassName,
   errorClassName,
   toolbarPosition = 'top',
+  modules,
   ...props
 }: QuillEditorProps) {
-  const quillModules = {
+  const quillModules = modules? modules : {
     toolbar: [
       // [{ header: [1, 2, 3, 4, 5, 6, false] }],
 

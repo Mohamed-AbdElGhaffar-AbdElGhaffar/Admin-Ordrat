@@ -1511,3 +1511,12 @@ html[dir=rtl] * {
 .rizzui-input-field::placeholder {
   font-size: 16px !important;
 }
+.rtl{
+  direction: rtl;
+}
+.ltr{
+  direction: ltr;
+}
+.react-quill .ql-editor{
+  direction: ltr;
+}
