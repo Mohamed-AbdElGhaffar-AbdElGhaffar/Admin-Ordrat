@@ -61,8 +61,14 @@ export default function PlanForm({
     nameEn: lang === 'ar' ? 'الأسم (انجليزي)' : 'Name (English)',
     descriptionAr: lang === 'ar' ? 'الوصف (عربي)' : 'Description (Arabic)',
     descriptionEn: lang === 'ar' ? 'الوصف (انجليزي)' : 'Description (English)',
-    annualPrice: lang === 'ar' ? 'السعر السنوي' : 'Annual Price',
-    monthlyPrice: lang === 'ar' ? 'السعر الشهري' : 'Monthly Price',
+    egpAnnualPrice: lang === 'ar' ? 'السعر السنوي المصري' : 'Egyptian Annual Price',
+    egpMonthlyPrice: lang === 'ar' ? 'السعر الشهري المصري' : 'Egyptian Monthly Price',
+    usdAnnualPrice: lang === 'ar' ? 'السعر السنوي بالدولار' : 'Annual Price in Dollars',
+    usdMonthlyPrice: lang === 'ar' ? 'السعر الشهري بالدولار' : 'Monthly Price in Dollars',
+    sarAnnualPrice: lang === 'ar' ? 'السعر السنوي السعودي' : 'Saudi Annual Price',
+    sarMonthlyPrice: lang === 'ar' ? 'السعر الشهري السعودي' : 'Saudi Monthly Price',
+    kwdAnnualPrice: lang === 'ar' ? 'السعر السنوي الكويتي' : 'Kuwaiti Annual Price',
+    kwdMonthlyPrice: lang === 'ar' ? 'السعر الشهري الكويتي' : 'Kuwaiti Monthly Price',
     addFeature: lang === 'ar' ? 'إضافة ميزة' : 'Add Feature',
     selectFeature: lang === 'ar' ? 'اختيار ميزة' : 'Select Feature',
     submit: lang === 'ar' ? 'إضافة خطة' : 'Add Plan',
@@ -83,12 +89,33 @@ export default function PlanForm({
     nameEn: Yup.string().required(text.nameEn + ' ' + requiredMessage),
     descriptionAr: Yup.string().required(text.descriptionAr + ' ' + requiredMessage),
     descriptionEn: Yup.string().required(text.descriptionEn + ' ' + requiredMessage),
-    annualPrice: Yup.string()
-    .required(text.annualPrice + ' ' + requiredMessage)
-    .test('is-number', text.annualPrice + text.requiredMessage, (value) => !isNaN(parseFloat(value))),
-    monthlyPrice: Yup.string()
-    .required(text.monthlyPrice + ' ' + requiredMessage)
-    .test('is-number', text.monthlyPrice + text.requiredMessage, (value) => !isNaN(parseFloat(value))),
+    egpAnnualPrice: Yup.string()
+    .required(text.egpAnnualPrice + ' ' + requiredMessage)
+    .test('is-number', text.egpAnnualPrice + text.requiredMessage, (value) => !isNaN(parseFloat(value))),
+    egpMonthlyPrice: Yup.string()
+    .required(text.egpMonthlyPrice + ' ' + requiredMessage)
+    .test('is-number', text.egpMonthlyPrice + text.requiredMessage, (value) => !isNaN(parseFloat(value))),
+    
+    usdAnnualPrice: Yup.string()
+    .required(text.usdAnnualPrice + ' ' + requiredMessage)
+    .test('is-number', text.usdAnnualPrice + text.requiredMessage, (value) => !isNaN(parseFloat(value))),
+    usdMonthlyPrice: Yup.string()
+    .required(text.usdMonthlyPrice + ' ' + requiredMessage)
+    .test('is-number', text.usdMonthlyPrice + text.requiredMessage, (value) => !isNaN(parseFloat(value))),
+    
+    sarAnnualPrice: Yup.string()
+    .required(text.sarAnnualPrice + ' ' + requiredMessage)
+    .test('is-number', text.sarAnnualPrice + text.requiredMessage, (value) => !isNaN(parseFloat(value))),
+    sarMonthlyPrice: Yup.string()
+    .required(text.sarMonthlyPrice + ' ' + requiredMessage)
+    .test('is-number', text.sarMonthlyPrice + text.requiredMessage, (value) => !isNaN(parseFloat(value))),
+    
+    kwdAnnualPrice: Yup.string()
+    .required(text.kwdAnnualPrice + ' ' + requiredMessage)
+    .test('is-number', text.kwdAnnualPrice + text.requiredMessage, (value) => !isNaN(parseFloat(value))),
+    kwdMonthlyPrice: Yup.string()
+    .required(text.kwdMonthlyPrice + ' ' + requiredMessage)
+    .test('is-number', text.kwdMonthlyPrice + text.requiredMessage, (value) => !isNaN(parseFloat(value))),
   });
 
   const mainFormik = useFormik({
@@ -97,8 +124,14 @@ export default function PlanForm({
       nameEn: '',
       descriptionAr: '',
       descriptionEn: '',
-      annualPrice: '',
-      monthlyPrice: '',
+      egpAnnualPrice: '',
+      egpMonthlyPrice: '',
+      usdAnnualPrice: '',
+      usdMonthlyPrice: '',
+      sarAnnualPrice: '',
+      sarMonthlyPrice: '',
+      kwdAnnualPrice: '',
+      kwdMonthlyPrice: '',
     },
     validationSchema: mainFormSchema,
     onSubmit: async (values) => {
@@ -108,10 +141,19 @@ export default function PlanForm({
           nameEn: values.nameEn,
           descriptionAr: values.descriptionAr,
           descriptionEn: values.descriptionEn,
-          annualPrice: parseFloat(values.annualPrice),
-          monthlyPrice: parseFloat(values.monthlyPrice),
+          egpAnnualPrice: parseFloat(values.egpAnnualPrice),
+          egpMonthlyPrice: parseFloat(values.egpMonthlyPrice),
+          usdAnnualPrice: parseFloat(values.usdAnnualPrice),
+          usdMonthlyPrice: parseFloat(values.usdMonthlyPrice),
+          sarAnnualPrice: parseFloat(values.sarAnnualPrice),
+          sarMonthlyPrice: parseFloat(values.sarMonthlyPrice),
+          kwdAnnualPrice: parseFloat(values.kwdAnnualPrice),
+          kwdMonthlyPrice: parseFloat(values.kwdMonthlyPrice),
           isActive: true,
-          planFeatures: selectedFeatures.map((feature) => feature.id),
+          planFeatures: selectedFeatures.map((feature, index) =>({
+            featureId: feature.id,
+            featureOrder: index,
+          })),
         };
     
         console.log("Request Payload:", requestPayload);
@@ -287,12 +329,20 @@ export default function PlanForm({
             mainFormik.handleSubmit();
           }
         }}>
-          <Input label={text.nameAr} placeholder={text.nameAr} name="nameAr" value={mainFormik.values.nameAr} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.nameAr && mainFormik.errors.nameAr ? mainFormik.errors.nameAr : ''} className="mb-4" />
-          <Input label={text.nameEn} placeholder={text.nameEn} name="nameEn" value={mainFormik.values.nameEn} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.nameEn && mainFormik.errors.nameEn ? mainFormik.errors.nameEn : ''} className="mb-4" />
-          <Input label={text.annualPrice} placeholder={text.annualPrice} name="annualPrice" value={mainFormik.values.annualPrice} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.annualPrice && mainFormik.errors.annualPrice ? mainFormik.errors.annualPrice : ''} className="mb-4" />
-          <Input label={text.monthlyPrice} placeholder={text.monthlyPrice} name="monthlyPrice" value={mainFormik.values.monthlyPrice} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.monthlyPrice && mainFormik.errors.monthlyPrice ? mainFormik.errors.monthlyPrice : ''} className="mb-4" />
-          <Textarea label={text.descriptionAr} placeholder={text.descriptionAr} name="descriptionAr" value={mainFormik.values.descriptionAr} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.descriptionAr && mainFormik.errors.descriptionAr ? mainFormik.errors.descriptionAr : ''} className="mb-4" />
-          <Textarea label={text.descriptionEn} placeholder={text.descriptionEn} name="descriptionEn" value={mainFormik.values.descriptionEn} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.descriptionEn && mainFormik.errors.descriptionEn ? mainFormik.errors.descriptionEn : ''} className="mb-4" />
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <Input label={text.nameAr} placeholder={text.nameAr} name="nameAr" value={mainFormik.values.nameAr} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.nameAr && mainFormik.errors.nameAr ? mainFormik.errors.nameAr : ''} className="mb-4" />
+            <Input label={text.nameEn} placeholder={text.nameEn} name="nameEn" value={mainFormik.values.nameEn} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.nameEn && mainFormik.errors.nameEn ? mainFormik.errors.nameEn : ''} className="mb-4" />
+            <Input type='number' label={text.egpAnnualPrice} placeholder={text.egpAnnualPrice} name="egpAnnualPrice" value={mainFormik.values.egpAnnualPrice} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.egpAnnualPrice && mainFormik.errors.egpAnnualPrice ? mainFormik.errors.egpAnnualPrice : ''} className="mb-4" />
+            <Input type='number' label={text.egpMonthlyPrice} placeholder={text.egpMonthlyPrice} name="egpMonthlyPrice" value={mainFormik.values.egpMonthlyPrice} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.egpMonthlyPrice && mainFormik.errors.egpMonthlyPrice ? mainFormik.errors.egpMonthlyPrice : ''} className="mb-4" />
+            <Input type='number' label={text.usdAnnualPrice} placeholder={text.usdAnnualPrice} name="usdAnnualPrice" value={mainFormik.values.usdAnnualPrice} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.usdAnnualPrice && mainFormik.errors.usdAnnualPrice ? mainFormik.errors.usdAnnualPrice : ''} className="mb-4" />
+            <Input type='number' label={text.usdMonthlyPrice} placeholder={text.usdMonthlyPrice} name="usdMonthlyPrice" value={mainFormik.values.usdMonthlyPrice} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.usdMonthlyPrice && mainFormik.errors.usdMonthlyPrice ? mainFormik.errors.usdMonthlyPrice : ''} className="mb-4" />
+            <Input type='number' label={text.sarAnnualPrice} placeholder={text.sarAnnualPrice} name="sarAnnualPrice" value={mainFormik.values.sarAnnualPrice} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.sarAnnualPrice && mainFormik.errors.sarAnnualPrice ? mainFormik.errors.sarAnnualPrice : ''} className="mb-4" />
+            <Input type='number' label={text.sarMonthlyPrice} placeholder={text.sarMonthlyPrice} name="sarMonthlyPrice" value={mainFormik.values.sarMonthlyPrice} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.sarMonthlyPrice && mainFormik.errors.sarMonthlyPrice ? mainFormik.errors.sarMonthlyPrice : ''} className="mb-4" />
+            <Input type='number' label={text.kwdAnnualPrice} placeholder={text.kwdAnnualPrice} name="kwdAnnualPrice" value={mainFormik.values.kwdAnnualPrice} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.kwdAnnualPrice && mainFormik.errors.kwdAnnualPrice ? mainFormik.errors.kwdAnnualPrice : ''} className="mb-4" />
+            <Input type='number' label={text.kwdMonthlyPrice} placeholder={text.kwdMonthlyPrice} name="kwdMonthlyPrice" value={mainFormik.values.kwdMonthlyPrice} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.kwdMonthlyPrice && mainFormik.errors.kwdMonthlyPrice ? mainFormik.errors.kwdMonthlyPrice : ''} className="mb-4" />
+            <Textarea label={text.descriptionAr} placeholder={text.descriptionAr} name="descriptionAr" value={mainFormik.values.descriptionAr} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.descriptionAr && mainFormik.errors.descriptionAr ? mainFormik.errors.descriptionAr : ''} className="mb-4" />
+            <Textarea label={text.descriptionEn} placeholder={text.descriptionEn} name="descriptionEn" value={mainFormik.values.descriptionEn} onChange={mainFormik.handleChange} onBlur={mainFormik.handleBlur} error={mainFormik.touched.descriptionEn && mainFormik.errors.descriptionEn ? mainFormik.errors.descriptionEn : ''} className="mb-4" />
+          </div>
 
           {/* Select Feature Section */}
           {(visibleSection === 'selectFeature' || selectedFeatures.length > 0) && (

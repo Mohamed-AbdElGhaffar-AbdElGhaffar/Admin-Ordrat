@@ -81,24 +81,87 @@ export const defaultColumns = (lang: string) => [
     ),
     enableSorting: false,
   }),
-  columnHelper.accessor('MonthlyPlanPrice', {
-    id: 'MonthlyPlanPrice',
+  columnHelper.accessor('egpMonthlyPlanPrice', {
+    id: 'egpMonthlyPlanPrice',
     size: 240,
-    header: lang === 'ar' ? 'سعر الخطة الشهرية' : 'Monthly Plan Price',
+    header: lang === 'ar' ? 'السعر الشهري المصري' : 'Egyptian Monthly Price',
     cell: ({ row }) => (
       <Text className="font-lexend text-sm font-medium text-gray-900 dark:text-gray-700">
-        {row.original.MonthlyPlanPrice}
+        {row.original.egpMonthlyPlanPrice}
       </Text>
     ),
   }),
-  columnHelper.accessor('AnnualPlanPrice', {
-    id: 'AnnualPlanPrice',
+  columnHelper.accessor('egpAnnualPlanPrice', {
+    id: 'egpAnnualPlanPrice',
     size: 240,
-    header: lang === 'ar' ? 'سعر الخطة السنوية' : 'Annual Plan Price',
+    header: lang === 'ar' ? 'السعر السنوي المصري' : 'Egyptian Annual Price',
     // filterFn: 'createdDate' as any,
     cell: ({ row }) => (
       <Text className="font-lexend text-sm font-medium text-gray-900 dark:text-gray-700">
-        {row.original.AnnualPlanPrice}
+        {row.original.egpAnnualPlanPrice}
+      </Text>
+    ),
+  }),
+  columnHelper.accessor('usdMonthlyPlanPrice', {
+    id: 'usdMonthlyPlanPrice',
+    size: 240,
+    header: lang === 'ar' ? 'السعر الشهري بالدولار' : 'Monthly Price in Dollars',
+    cell: ({ row }) => (
+      <Text className="font-lexend text-sm font-medium text-gray-900 dark:text-gray-700">
+        {row.original.usdMonthlyPlanPrice}
+      </Text>
+    ),
+  }),
+  columnHelper.accessor('usdAnnualPlanPrice', {
+    id: 'usdAnnualPlanPrice',
+    size: 240,
+    header: lang === 'ar' ? 'السعر السنوي بالدولار' : 'Annual Price in Dollars',
+    // filterFn: 'createdDate' as any,
+    cell: ({ row }) => (
+      <Text className="font-lexend text-sm font-medium text-gray-900 dark:text-gray-700">
+        {row.original.usdAnnualPlanPrice}
+      </Text>
+    ),
+  }),
+  columnHelper.accessor('sarMonthlyPlanPrice', {
+    id: 'sarMonthlyPlanPrice',
+    size: 240,
+    header: lang === 'ar' ? 'السعر الشهري السعودي' : 'Saudi Monthly Price',
+    cell: ({ row }) => (
+      <Text className="font-lexend text-sm font-medium text-gray-900 dark:text-gray-700">
+        {row.original.sarMonthlyPlanPrice}
+      </Text>
+    ),
+  }),
+  columnHelper.accessor('sarAnnualPlanPrice', {
+    id: 'sarAnnualPlanPrice',
+    size: 240,
+    header: lang === 'ar' ? 'السعر السنوي السعودي' : 'Saudi Annual Price',
+    // filterFn: 'createdDate' as any,
+    cell: ({ row }) => (
+      <Text className="font-lexend text-sm font-medium text-gray-900 dark:text-gray-700">
+        {row.original.sarAnnualPlanPrice}
+      </Text>
+    ),
+  }),
+  columnHelper.accessor('kwdMonthlyPlanPrice', {
+    id: 'kwdMonthlyPlanPrice',
+    size: 240,
+    header: lang === 'ar' ? 'السعر الشهري الكويتي' : 'Kuwaiti Monthly Price',
+    cell: ({ row }) => (
+      <Text className="font-lexend text-sm font-medium text-gray-900 dark:text-gray-700">
+        {row.original.kwdMonthlyPlanPrice}
+      </Text>
+    ),
+  }),
+  columnHelper.accessor('kwdAnnualPlanPrice', {
+    id: 'kwdAnnualPlanPrice',
+    size: 240,
+    header: lang === 'ar' ? 'السعر السنوي الكويتي' : 'Kuwaiti Annual Price',
+    // filterFn: 'createdDate' as any,
+    cell: ({ row }) => (
+      <Text className="font-lexend text-sm font-medium text-gray-900 dark:text-gray-700">
+        {row.original.kwdAnnualPlanPrice}
       </Text>
     ),
   }),

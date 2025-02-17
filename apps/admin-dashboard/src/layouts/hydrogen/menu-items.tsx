@@ -106,6 +106,11 @@ export const menuItems = [
     href: routes.artical,
     icon: <PiMonitorPlay />,
   },
+  {
+    name: 'sidebar-menu-transaction',
+    href: routes.transaction,
+    icon: <PiCurrencyDollarDuotone />,
+  },
   // // label start
   // {
   //   name: 'sidebar-menu-widgets',

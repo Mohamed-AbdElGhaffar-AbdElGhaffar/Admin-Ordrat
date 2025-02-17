@@ -42,7 +42,7 @@ export default function AddButton({
               onSuccess={onSuccess}
             />
           ),
-          customSize: '480px',
+          customSize: '700px',
         })
       }
       className={cn('w-auto', className)}

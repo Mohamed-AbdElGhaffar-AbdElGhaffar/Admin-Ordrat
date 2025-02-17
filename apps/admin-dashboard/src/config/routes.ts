@@ -150,4 +150,5 @@ export const routes = {
   delivery: '/delivery',
   faq: '/faq',
   artical: '/artical',
+  transaction: '/transaction',
 };

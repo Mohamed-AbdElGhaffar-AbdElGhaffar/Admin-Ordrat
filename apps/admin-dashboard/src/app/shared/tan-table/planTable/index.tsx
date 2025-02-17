@@ -86,14 +86,38 @@ export default function PlanTable({lang = "en"}:{lang?:string;}) {
         id: plan.id,
         name: lang === 'ar' ? plan.name : plan.name,
         userName: lang === 'ar' ? plan.name : plan.name,
-        MonthlyPlanPrice:
+        egpMonthlyPlanPrice:
           lang === 'ar'
-            ? `${plan.monthlyPrice} جنيه`
-            : `${plan.monthlyPrice} EGP`,
-        AnnualPlanPrice:
+            ? `${plan.egpMonthlyPrice} جنيه`
+            : `${plan.egpMonthlyPrice} EGP`,
+        egpAnnualPlanPrice:
           lang === 'ar'
-            ? `${plan.annualPrice} جنيه`
-            : `${plan.annualPrice} EGP`,
+            ? `${plan.egpAnnualPrice} جنيه`
+            : `${plan.egpAnnualPrice} EGP`,
+        usdMonthlyPlanPrice:
+          lang === 'ar'
+            ? `${plan.usdMonthlyPrice} دولار`
+            : `${plan.usdMonthlyPrice} USD`,
+        usdAnnualPlanPrice:
+          lang === 'ar'
+            ? `${plan.usdAnnualPrice} دولار`
+            : `${plan.usdAnnualPrice} USD`,
+        sarMonthlyPlanPrice:
+          lang === 'ar'
+            ? `${plan.sarMonthlyPrice} ريال سعودي`
+            : `${plan.sarMonthlyPrice} SAR`,
+        sarAnnualPlanPrice:
+          lang === 'ar'
+            ? `${plan.sarAnnualPrice} ريال سعودي`
+            : `${plan.sarAnnualPrice} SAR`,
+        kwdMonthlyPlanPrice:
+          lang === 'ar'
+            ? `${plan.kwdMonthlyPrice} دينار كويتي`
+            : `${plan.kwdMonthlyPrice} KWD`,
+        kwdAnnualPlanPrice:
+          lang === 'ar'
+            ? `${plan.kwdAnnualPrice} دينار كويتي`
+            : `${plan.kwdAnnualPrice} KWD`,
       }));
 
       setDefaultData(transformedData);

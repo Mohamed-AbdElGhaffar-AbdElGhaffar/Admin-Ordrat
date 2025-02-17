@@ -10,8 +10,14 @@ export type Products = {
 export type Person = {
   id: string;
   name: string;
-  MonthlyPlanPrice: string;
-  AnnualPlanPrice: string;
+  egpMonthlyPlanPrice: string;
+  egpAnnualPlanPrice: string;
+  usdMonthlyPlanPrice: string;
+  usdAnnualPlanPrice: string;
+  sarMonthlyPlanPrice: string;
+  sarAnnualPlanPrice: string;
+  kwdMonthlyPlanPrice: string;
+  kwdAnnualPlanPrice: string;
   userName: string;
   avatar?: string;
   email?: string;

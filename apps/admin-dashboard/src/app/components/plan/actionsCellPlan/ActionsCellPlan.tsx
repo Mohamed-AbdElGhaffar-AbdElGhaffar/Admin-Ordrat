@@ -29,14 +29,14 @@ const ActionsCellPlan: React.FC<ActionsCellProps> = ({ row, lang, view = false }
   const handleOpenModal = () => {
     openModal({
       view: <UpdatePlanForm lang={lang} planId={row.original.id}  />,
-      customSize: '480px',
+      customSize: '700px',
     });
   };
 
   const handleOpenDetailsModal = () => {
     openModal({
       view: <UpdatePlanForm lang={lang} title={`معلومات الخطة`} planId={row.original.id} />,
-      customSize: '800px',
+      customSize: '700px',
     });
   };
 
