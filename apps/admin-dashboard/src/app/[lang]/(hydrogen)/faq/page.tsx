@@ -1,3 +1,4 @@
+import SessionGuard from '@/app/components/guard/SessionGuard';
 import FaqTable from '@/app/shared/tan-table/faqTable';
 import { metaObject } from '@/config/site.config';
 
@@ -13,6 +14,8 @@ export default function FAQ({
   };
 }) {
   return<>
-    <FaqTable  lang={lang} />
+    <SessionGuard lang={lang}>
+      <FaqTable  lang={lang} />
+    </SessionGuard>
   </>;
 }

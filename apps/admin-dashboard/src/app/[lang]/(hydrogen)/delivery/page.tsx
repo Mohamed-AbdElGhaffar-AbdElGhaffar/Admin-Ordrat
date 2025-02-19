@@ -1,3 +1,4 @@
+import SessionGuard from '@/app/components/guard/SessionGuard';
 import DeliveryTable from '@/app/shared/tan-table/deliveryTable';
 import { metaObject } from '@/config/site.config';
 
@@ -14,6 +15,8 @@ export default function Delivery({
 }) {
   return<>
     {/* <FileDashboard lang={lang} />; */}
-    <DeliveryTable  lang={lang} />
+    <SessionGuard lang={lang}>
+      <DeliveryTable  lang={lang} />
+    </SessionGuard>
   </>;
 }

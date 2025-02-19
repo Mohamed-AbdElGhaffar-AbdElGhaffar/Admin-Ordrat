@@ -1,3 +1,4 @@
+import SessionGuard from '@/app/components/guard/SessionGuard';
 import TradersTable from '@/app/shared/tan-table/tradersTable';
 import { metaObject } from '@/config/site.config';
 
@@ -14,6 +15,8 @@ export default function Traders({
 }) {
   return<>
     {/* <FileDashboard lang={lang} />; */}
-    <TradersTable  lang={lang} />
+    <SessionGuard lang={lang}>
+      <TradersTable  lang={lang} />
+    </SessionGuard>
   </>;
 }

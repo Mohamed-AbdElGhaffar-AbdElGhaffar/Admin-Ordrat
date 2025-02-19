@@ -1,3 +1,4 @@
+import SessionGuard from '@/app/components/guard/SessionGuard';
 import BuyersTable from '@/app/shared/tan-table/buyersTable';
 import { metaObject } from '@/config/site.config';
 
@@ -14,6 +15,8 @@ export default function Buyers({
 }) {
   return<>
     {/* <FileDashboard lang={lang} />; */}
-    <BuyersTable  lang={lang} />
+    <SessionGuard lang={lang}>
+      <BuyersTable  lang={lang} />
+    </SessionGuard>
   </>;
 }

@@ -1,3 +1,4 @@
+import SessionGuard from '@/app/components/guard/SessionGuard';
 import ReviewsTable from '@/app/shared/tan-table/reviewsTable';
 import { metaObject } from '@/config/site.config';
 
@@ -14,6 +15,8 @@ export default function Reviews({
 }) {
   return<>
     {/* <FileDashboard lang={lang} />; */}
-    <ReviewsTable  lang={lang} />
+    <SessionGuard lang={lang}>
+      <ReviewsTable  lang={lang} />
+    </SessionGuard>
   </>;
 }

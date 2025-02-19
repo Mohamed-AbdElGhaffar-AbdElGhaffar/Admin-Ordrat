@@ -1,3 +1,4 @@
+import SessionGuard from '@/app/components/guard/SessionGuard';
 import ReviewsTable from '@/app/shared/tan-table/reviewsTable';
 import StoresTable from '@/app/shared/tan-table/storesTable';
 import { metaObject } from '@/config/site.config';
@@ -15,6 +16,8 @@ export default function Stores({
 }) {
   return<>
     {/* <FileDashboard lang={lang} />; */}
-    <StoresTable  lang={lang} />
+    <SessionGuard lang={lang}>
+      <StoresTable  lang={lang} />
+    </SessionGuard>
   </>;
 }

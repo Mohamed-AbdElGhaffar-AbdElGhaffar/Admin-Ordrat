@@ -1,3 +1,4 @@
+import SessionGuard from '@/app/components/guard/SessionGuard';
 import TransactionHistoryTable from '@/app/shared/tan-table/transaction-history-table';
 import { metaObject } from '@/config/site.config';
 
@@ -13,6 +14,8 @@ export default function Transaction({
   };
 }) {
   return<>
-    <TransactionHistoryTable className="col-span-full" lang={lang} />
+    <SessionGuard lang={lang}>
+      <TransactionHistoryTable className="col-span-full" lang={lang} />
+    </SessionGuard>
   </>;
 }

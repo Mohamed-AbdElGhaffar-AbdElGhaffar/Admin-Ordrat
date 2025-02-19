@@ -1,3 +1,4 @@
+import SessionGuard from "@/app/components/guard/SessionGuard";
 import FileDashboard from "@/app/shared/file/dashboard";
 import { metaObject } from "@/config/site.config";
 
@@ -12,5 +13,9 @@ export default function FileDashboardPage({
     lang: string;
   };
 }) {
-  return <FileDashboard lang={lang} />;
+  return <>
+    <SessionGuard lang={lang}>
+      <FileDashboard lang={lang} />;
+    </SessionGuard>
+  </>;
 }

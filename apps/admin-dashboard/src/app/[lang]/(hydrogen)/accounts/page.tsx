@@ -1,3 +1,4 @@
+import SessionGuard from '@/app/components/guard/SessionGuard';
 import AccountsTable from '@/app/shared/tan-table/accountsTable';
 import { metaObject } from '@/config/site.config';
 
@@ -14,6 +15,8 @@ export default function Accounts({
 }) {
   return<>
     {/* <FileDashboard lang={lang} />; */}
-    <AccountsTable  lang={lang} />
+    <SessionGuard lang={lang}>
+      <AccountsTable  lang={lang} />
+    </SessionGuard>
   </>;
 }
