@@ -3,10 +3,10 @@
   "version": "7.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3001",
+    "dev": "next dev -p 3003",
     "lint": "next lint",
     "build": "next build",
-    "start": "next start -p 3001",
+    "start": "next start -p 3003",
     "clean": "rm -rf node_modules .next .cache .turbo"
   },
   "dependencies": {
