@@ -8,6 +8,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "@/app/i18n/client";
+import { useGuardContext } from "@/app/components/context/GuardContext";
 
 export default function ProfileMenu({
   buttonClassName,
@@ -19,7 +20,7 @@ export default function ProfileMenu({
   avatarClassName?: string;
   username?: boolean;
   lang?: string;
-}) {
+}) {  
   return (
     <ProfileMenuPopover>
       <Popover.Trigger>
@@ -86,6 +87,7 @@ const menuItems = [
 
 function DropdownMenu({ lang }: { lang?: string }) {
   const { t } = useTranslation(lang!);
+  const { setGuard } = useGuardContext();
 
   return (
     <div className="w-64 text-left rtl:text-right">
@@ -116,7 +118,11 @@ function DropdownMenu({ lang }: { lang?: string }) {
         <Button
           className="h-auto w-full justify-start p-0 font-medium text-gray-700 outline-none focus-within:text-gray-600 hover:text-gray-900 focus-visible:ring-0"
           variant="text"
-          onClick={() => signOut()}
+          onClick={() =>{
+            localStorage.removeItem("accessToken");
+            setGuard(false);
+            signOut({ callbackUrl: `/${lang}/signin` });
+          }}
         >
           {t('text-sign-out')}
         </Button>

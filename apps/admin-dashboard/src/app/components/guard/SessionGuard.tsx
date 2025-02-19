@@ -2,6 +2,7 @@
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useGuardContext } from '../context/GuardContext';
+import { signOut } from 'next-auth/react';
 
 type Props = {
   children: React.ReactNode;
@@ -19,7 +20,8 @@ const SessionGuard = ({ children, lang = 'en' }: Props) => {
       setGuard(true);
     } else {
       setGuard(false);
-      router.replace(`/${lang}/signin`);
+      // router.replace(`/${lang}/signin`);
+      signOut({ callbackUrl: `/${lang}/signin` });
     }
   }, [lang, router, setGuard]);
 
