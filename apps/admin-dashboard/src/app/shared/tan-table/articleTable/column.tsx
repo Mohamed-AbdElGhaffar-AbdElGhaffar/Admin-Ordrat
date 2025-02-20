@@ -1,12 +1,12 @@
-import { Artical } from '@/data/tan-table-data';
+import { Article } from '@/data/tan-table-data';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Text } from 'rizzui';
 import AvatarCard from '@ui/avatar-card';
 import ActionsCellFAQ from '@/app/components/faq/actionsCellFAQ/ActionsCellFAQ';
 import DateCell from '@ui/date-cell';
-import ActionsCellArtical from '@/app/components/artical/actionsCellArtical/ActionsCellArtical';
+import ActionsCellArticle from '@/app/components/article/actionsCellArticle/ActionsCellArticle';
 
-const columnHelper = createColumnHelper<Artical>();
+const columnHelper = createColumnHelper<Article>();
 
 export const defaultColumns = (lang: string) => [
   columnHelper.accessor('title', {
@@ -80,6 +80,6 @@ export const defaultColumns = (lang: string) => [
     header: '',
     enablePinning: true,
     enableSorting: false,
-    cell: ({ row }) => <ActionsCellArtical row={row} lang={lang}/>,
+    cell: ({ row }) => <ActionsCellArticle row={row} lang={lang}/>,
   })
 ];

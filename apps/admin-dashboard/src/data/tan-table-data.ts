@@ -98,7 +98,7 @@ export type Faq = {
   faQs: any;
   userName: string;
 };
-export type Artical = {
+export type Article = {
   id: string;
   title: string;
   description: string;

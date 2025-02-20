@@ -1,12 +1,12 @@
 import SessionGuard from '@/app/components/guard/SessionGuard';
-import ArticalTable from '@/app/shared/tan-table/articalTable';
+import ArticleTable from '@/app/shared/tan-table/articleTable';
 import { metaObject } from '@/config/site.config';
 
 export const metadata = {
-  ...metaObject('Artical'),
+  ...metaObject('Article'),
 };
 
-export default function Artical({
+export default function Article({
   params: { lang },
 }: {
   params: {
@@ -15,7 +15,7 @@ export default function Artical({
 }) {
   return<>
     <SessionGuard lang={lang}>
-      <ArticalTable lang={lang} />
+      <ArticleTable lang={lang} />
     </SessionGuard>
   </>;
 }

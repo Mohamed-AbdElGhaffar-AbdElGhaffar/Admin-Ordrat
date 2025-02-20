@@ -5,7 +5,7 @@ import { Button } from 'rizzui';
 import cn from '@utils/class-names';
 import { PiPlusBold } from 'react-icons/pi';
 import { useModal } from '@/app/shared/modal-views/use-modal';
-import AddArticalForm from '../components/artical/AddArticalForm/AddArticalForm';
+import AddArticleForm from '../components/article/AddArticleForm/AddArticleForm';
 const FileUpload = dynamic(() => import('@/app/shared/file-upload'), {
   ssr: false,
 });
@@ -17,9 +17,9 @@ type AddButtonProps = {
   onSuccess?: () => void;
 };
 
-export default function ArticalAddButton({
+export default function ArticleAddButton({
   className,
-  buttonLabel = 'Add Artical',
+  buttonLabel = 'Add Article',
   lang,
   onSuccess,
 }: React.PropsWithChildren<AddButtonProps>) {
@@ -29,7 +29,7 @@ export default function ArticalAddButton({
       onClick={() =>
         openModal({
           view: (
-            <AddArticalForm title={lang === 'ar' ? "المقالة" : "Artical"} lang={lang!} onSuccess={onSuccess} />
+            <AddArticleForm title={lang === 'ar' ? "المقالة" : "Article"} lang={lang!} onSuccess={onSuccess} />
           ),
           customSize: '700px',
         })

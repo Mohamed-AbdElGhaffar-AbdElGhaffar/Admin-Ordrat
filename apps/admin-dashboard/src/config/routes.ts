@@ -149,6 +149,6 @@ export const routes = {
   traders: '/traders',
   delivery: '/delivery',
   faq: '/faq',
-  artical: '/artical',
+  article: '/article',
   transaction: '/transaction',
 };

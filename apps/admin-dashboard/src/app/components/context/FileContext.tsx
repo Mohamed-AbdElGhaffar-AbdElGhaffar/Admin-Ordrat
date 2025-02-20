@@ -19,8 +19,8 @@ type FileContextType = {
   setUpdateSeller: React.Dispatch<React.SetStateAction<boolean>>;
   updateFaq: boolean;
   setUpdateFaq: React.Dispatch<React.SetStateAction<boolean>>;
-  updateArtical: boolean;
-  setUpdateArtical: React.Dispatch<React.SetStateAction<boolean>>;
+  updateArticle: boolean;
+  setUpdateArticle: React.Dispatch<React.SetStateAction<boolean>>;
 
   login: boolean;
   setLogin: React.Dispatch<React.SetStateAction<boolean>>;
@@ -37,7 +37,7 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [updateAccounts, setUpdateAccounts] = useState<boolean>(false);
   const [updateSeller, setUpdateSeller] = useState<boolean>(false);
   const [updateFaq, setUpdateFaq] = useState<boolean>(false);
-  const [updateArtical, setUpdateArtical] = useState<boolean>(false);
+  const [updateArticle, setUpdateArticle] = useState<boolean>(false);
  
   const [login, setLogin] = useState<boolean>(false);
 
@@ -51,7 +51,7 @@ export const FileProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       updateAccounts, setUpdateAccounts, 
       updateSeller, setUpdateSeller, 
       updateFaq, setUpdateFaq, 
-      updateArtical, setUpdateArtical, 
+      updateArticle, setUpdateArticle, 
       login, setLogin 
     }}>
       {children}

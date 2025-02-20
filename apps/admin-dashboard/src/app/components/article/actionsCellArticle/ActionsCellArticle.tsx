@@ -6,7 +6,7 @@ import DeletePopover from '@/app/shared/delete-popover';
 import { API_BASE_URL } from '@/config/base-url';
 import toast from 'react-hot-toast';
 import { useFileContext } from '../../context/FileContext';
-import UpdateArticalForm from '../UpdateArticalForm/UpdateArticalForm';
+import UpdateArticleForm from '../UpdateArticleForm/UpdateArticleForm';
 
 interface ActionsCellProps {
   row: any ;
@@ -14,13 +14,13 @@ interface ActionsCellProps {
   view?:boolean; 
 }
 
-const ActionsCellArtical: React.FC<ActionsCellProps> = ({ row, lang, view = false }) => {    
+const ActionsCellArticle: React.FC<ActionsCellProps> = ({ row, lang, view = false }) => {    
   const { openModal } = useModal();
-  const { setUpdateArtical } = useFileContext();  
+  const { setUpdateArticle } = useFileContext();  
 
   const handleOpenModal = () => {
     openModal({
-      view: <UpdateArticalForm lang={lang} row={row.original} onSuccess={()=>setUpdateArtical(true)}/>,
+      view: <UpdateArticleForm lang={lang} row={row.original} onSuccess={()=>setUpdateArticle(true)}/>,
       customSize: '700px',
     });
   };
@@ -35,14 +35,14 @@ const ActionsCellArtical: React.FC<ActionsCellProps> = ({ row, lang, view = fals
       });
 
       if (response.ok) {
-        setUpdateArtical(true);
-        toast.success(lang === 'ar' ? 'تم حذف المقالة بنجاح!' : 'Artical deleted successfully!');
+        setUpdateArticle(true);
+        toast.success(lang === 'ar' ? 'تم حذف المقالة بنجاح!' : 'Article deleted successfully!');
       } else {
-        toast.error(lang === 'ar' ? 'حدث خطأ أثناء الحذف' : 'An error occurred while deleting the Artical');
+        toast.error(lang === 'ar' ? 'حدث خطأ أثناء الحذف' : 'An error occurred while deleting the Article');
       }
     } catch (error) {
       console.error('Error deleting feature:', error);
-      toast.error(lang === 'ar' ? 'حدث خطأ أثناء الحذف' : 'An error occurred while deleting the Artical');
+      toast.error(lang === 'ar' ? 'حدث خطأ أثناء الحذف' : 'An error occurred while deleting the Article');
     }
   };
 
@@ -50,7 +50,7 @@ const ActionsCellArtical: React.FC<ActionsCellProps> = ({ row, lang, view = fals
     <div className="flex items-center justify-end gap-3 pe-3">
       <Tooltip
         size="sm"
-        content={lang === 'ar' ? 'تعديل المقالة' : 'Edit Artical'}
+        content={lang === 'ar' ? 'تعديل المقالة' : 'Edit Article'}
         placement="top"
         color="invert"
       >
@@ -65,11 +65,11 @@ const ActionsCellArtical: React.FC<ActionsCellProps> = ({ row, lang, view = fals
         </ActionIcon>
       </Tooltip>
       <DeletePopover
-        title={lang === 'ar' ? 'حذف المقالة' : 'Delete Artical'}
+        title={lang === 'ar' ? 'حذف المقالة' : 'Delete Article'}
         description={
           lang === 'ar' 
             ? `هل أنت متأكد أنك تريد حذف  (${row.original.title?row.original.title:'المقالة هذه '})؟`
-            : `Are you sure you want to delete this (${row.original.title?row.original.title:'Artical '})?`
+            : `Are you sure you want to delete this (${row.original.title?row.original.title:'Article '})?`
         }
         onDelete={handleDeleteFAQ}
       />
@@ -77,4 +77,4 @@ const ActionsCellArtical: React.FC<ActionsCellProps> = ({ row, lang, view = fals
   );
 };
 
-export default ActionsCellArtical;
+export default ActionsCellArticle;

@@ -102,8 +102,8 @@ export const menuItems = [
     icon: <PiQuestionBold />,
   },
   {
-    name: 'sidebar-menu-artical',
-    href: routes.artical,
+    name: 'sidebar-menu-article',
+    href: routes.article,
     icon: <PiMonitorPlay />,
   },
   {

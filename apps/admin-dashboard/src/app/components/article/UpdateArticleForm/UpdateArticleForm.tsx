@@ -1,6 +1,7 @@
 'use client';
 
-import { PiXBold, PiPlusBold, PiMinusBold, PiTrashBold, PiUploadSimple } from 'react-icons/pi';
+import dynamic from 'next/dynamic';
+import { PiXBold, PiPlusBold, PiMinusBold, PiUploadSimple, PiTrashBold } from 'react-icons/pi';
 import React, { useEffect, useState } from 'react';
 import { ActionIcon, Title, Button, Input, Textarea } from 'rizzui';
 import { useModal } from '@/app/shared/modal-views/use-modal';
@@ -12,9 +13,13 @@ import { Loader } from 'lucide-react';
 import 'react-datepicker/dist/react-datepicker.css';
 import axiosClient from '../../context/api';
 import FileUpload from '@/app/shared/image-form-upload';
+import { useFileContext } from '../../context/FileContext';
 import Image from 'next/image';
-
+const QuillEditor = dynamic(() => import('@ui/quill-editor'), {
+  ssr: false,
+});
 type Sections = {
+  id?: string;
   image: File | null;
   titleAr: string;
   titleEn: string;
@@ -24,24 +29,25 @@ type Sections = {
   additionalInfoEn: string;
 };
 
-type AddArticalFormProps = {
+type UpdateArticleFormProps = {
   title?: string;
   onSuccess?: () => void;
   lang: string;
+  row: any;
 };
 
-export default function AddArticalForm({
+export default function UpdateArticleForm({
   title,
   onSuccess,
   lang = 'en',
-}: AddArticalFormProps) {
+  row
+}: UpdateArticleFormProps) {
   const { closeModal } = useModal();
-  
-
+  const { fileData, setFileData } = useFileContext();
   const [sections, setSections] = useState<Sections[]>([]);
   const [loading, setLoading] = useState(false);
-  const [image, setImage] = useState<File | null>(null);
-
+  const [image, setImage] = useState<File | null | string>(null);
+  
   const text = {
     nameAr: lang === 'ar' ? 'الأسم (عربي)' : 'Name (Arabic)',
     nameEn: lang === 'ar' ? 'الأسم (انجليزي)' : 'Name (English)',
@@ -62,10 +68,7 @@ export default function AddArticalForm({
     contentAr: lang === 'ar' ? "المحتوى (عربي)" : "content (Arabic)",
     additionalInfoEn: lang === 'ar' ? "معلومات اضافية (انجليزي)" : "Additional Info (English)",
     additionalInfoAr: lang === 'ar' ? "معلومات اضافية (عربي)" : "Additional Info (Arabic)",
-    images: lang === 'ar' ? 'الصور' : 'Images',
-    addImages: lang === 'ar' ? 'الصورة' : 'Image',
-
-    submit: lang === 'ar' ? 'انشاء' : 'Create',
+    submit: lang === 'ar' ? 'تعديل' : 'Update',
   };
   
   const requiredMessage = lang === 'ar' ? 'مطلوب' : 'is required';
@@ -81,15 +84,53 @@ export default function AddArticalForm({
     SlugEn: Yup.string().required(text.SlugEn + ' ' + requiredMessage),
     TagsAr: Yup.string().required(text.TagsAr + ' ' + requiredMessage),
     TagsEn: Yup.string().required(text.TagsEn + ' ' + requiredMessage),
-    image: Yup.mixed().required(`${text.image} ${requiredMessage}`).test(
-      'fileFormat',
-      lang === 'ar' ? 'يجب أن يكون ملف صورة' : 'Must be an image file',
-      (file) => {
-        return !file || (file instanceof File && ['image/jpeg', 'image/png', 'image/gif'].includes(file.type));
-      }
-    ),
+    image: Yup.string().required(text.image + ' ' + requiredMessage)
   });
-
+  const fetchArticle = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axiosClient.get(
+        `/api/Article/GetById/${row.id}`,
+        {
+          headers: {
+            'Accept-Language': lang,
+          },
+        }
+      );
+      setSections(data.sections.map((section: any) => ({
+        id: section.id,
+        image: section.imageUrl,
+        titleAr: section.titleAr,
+        titleEn: section.titleEn,
+        contentAr: section.contentAr,
+        contentEn: section.contentEn,
+        additionalInfoAr: section.additionalInfoAr || '',
+        additionalInfoEn: section.additionalInfoEn || '',
+      })));
+      mainFormik.setValues({
+        nameAr: data.titleAr,
+        nameEn: data.titleEn,
+        DescriptionAr: data.descriptionAr,
+        DescriptionEn: data.descriptionEn,
+        MetaDescriptionAr: data.metaDescriptionAr,
+        MetaDescriptionEn: data.metaDescriptionEn,
+        SlugAr: data.slugAr,
+        SlugEn: data.slugEn,
+        TagsAr: data.tagsAr,
+        TagsEn: data.tagsEn,
+        image: data.imageUrl,
+      });
+      setImage(data.imageUrl);
+    } catch (error) {
+      toast.error('Failed to load article data.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchArticle();
+    setFileData(true);
+  }, [row]); 
   const mainFormik = useFormik({
     initialValues: {
       nameAr: '',
@@ -102,7 +143,7 @@ export default function AddArticalForm({
       SlugEn: '',
       TagsAr: '',
       TagsEn: '',
-      image: null,
+      image: '',
     },
     validationSchema: mainFormSchema,
     onSubmit: async (values) => {
@@ -119,26 +160,28 @@ export default function AddArticalForm({
       formData.append('TagsEn', values.TagsEn);
       // Append Sections
       sections.forEach((section, index) => {
+        if(section.id){
+          formData.append(`Sections[${index}].id`, section.id);
+        }
         formData.append(`Sections[${index}].titleEn`, section.titleEn);
         formData.append(`Sections[${index}].titleAr`, section.titleAr);
         formData.append(`Sections[${index}].contentEn`, section.contentEn);
         formData.append(`Sections[${index}].contentAr`, section.contentAr);
         formData.append(`Sections[${index}].additionalInfoEn`, section.additionalInfoEn);
         formData.append(`Sections[${index}].additionalInfoAr`, section.additionalInfoAr);
-        if (section.image) {
+        if (section.image instanceof File) {
           formData.append(`Sections[${index}].image`, section.image);
         }
       });
-      if (values.image) {
-        formData.append('Image', values.image);
+      if (values.image == 'file' && image) {
+        formData.append('Image', image);
       }
-      console.log("sections: ",sections);
       
       try {
-        const response = await axiosClient.post('/api/Article/Create', formData);
+        const response = await axiosClient.put(`/api/Article/Update/${row.id}`, formData);
 
         toast.success(
-          lang === 'ar' ? 'تم انشاء المقالة بنجاح!' : 'Artical created successfully!'
+          lang === 'ar' ? 'تم تحديث المقالة بنجاح!' : 'Article updated successfully!'
         );
         if (onSuccess) onSuccess();
         closeModal();
@@ -146,14 +189,14 @@ export default function AddArticalForm({
         console.error('API Error:', error);
         toast.error(
           lang === 'ar'
-            ? 'فشل في انشاء المقالة. حاول مجدداً.'
-            : 'Failed to create Artical. Please try again.'
+            ? 'فشل في تحديث المقالة. حاول مجدداً.'
+            : 'Failed to update Article. Please try again.'
         );
       }
     },
   });
 
-  const handleAddSections = () => setSections([...sections, { titleEn: '', titleAr: '', contentEn: '', contentAr: '', additionalInfoEn: '', additionalInfoAr: '', image: null, }]);
+  const handleAddSections = () => setSections([...sections, { titleEn: '', titleAr: '', contentEn: '', contentAr: '', additionalInfoEn: '', additionalInfoAr: '', image: null }]);
   
   const handleRemoveSections = (index: number) => setSections(sections.filter((_, i) => i !== index));
   const handleSectionsChange = (index: number, field: 'titleEn' | 'titleAr' | 'contentEn' | 'contentAr' | 'additionalInfoEn' | 'additionalInfoAr', value: string) => {
@@ -162,6 +205,7 @@ export default function AddArticalForm({
     setSections(updatedSections);
   };
 
+  
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -175,7 +219,7 @@ export default function AddArticalForm({
     const updatedPictures = [...sections];
     updatedPictures[index].image = null;
     setSections(updatedPictures);
-  };
+  };  
 
   if (loading) {
     return (
@@ -184,7 +228,6 @@ export default function AddArticalForm({
       </div>
     );
   }
-  
   return (
     <div className='py-1'>
       <div className={`m-auto ps-3 rounded-xl pe-1.5 me-1.5 pb-4 pt-4 IBM-Plex-sans ${styles.customScroll}`}>
@@ -218,13 +261,17 @@ export default function AddArticalForm({
             lang={lang}
             onFileChange={(file) => {
               setImage(file || null);
-              mainFormik.setFieldValue('image', file);
+              mainFormik.setFieldValue('image', 'file');
             }}
             onFileDelete={() => {
               setImage(null);
               mainFormik.setFieldValue('image', null);
             }}
+            initialImage={row?.imageUrl}
           />
+          {mainFormik.touched.image && mainFormik.errors.image && (
+            <div className={`text-red-500 text-sm ${fileData? '' : 'mb-6' }`}>{typeof mainFormik.errors.image === 'string' ? mainFormik.errors.image : undefined}</div>
+          )}
           {/* Sections Section */}
           {sections.length != 0  &&(
             <div className="p-3 border border-gray-200 rounded-md mb-4">
@@ -250,7 +297,7 @@ export default function AddArticalForm({
                       onChange={(e) => handleSectionsChange(index, 'titleAr', e.target.value)}
                     />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                  {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                     <Textarea
                       value={section.contentEn}
                       placeholder={`${text.contentEn} ${lang === 'ar'? ' رقم':'number '} ${index+1}`}
@@ -275,56 +322,149 @@ export default function AddArticalForm({
                       placeholder={`${text.additionalInfoAr} ${lang === 'ar'? ' رقم':''} ${index+1}`}
                       onChange={(e) => handleSectionsChange(index, 'additionalInfoAr', e.target.value)}
                     />
+                  </div> */}
+                  <div className="flex flex-col gap-4 mb-3 rtl:ltr">
+                    <QuillEditor
+                      value={section.contentEn}
+                      placeholder={`${text.contentEn} ${lang === 'ar'? ' رقم':'number '} ${index+1}`}
+                      onChange={(value) => {
+                        console.log("value: ", value);
+                        handleSectionsChange(index, 'contentEn', value)
+                      }}
+                      className={`@3xl:col-span-2 [&>.ql-container_.ql-editor]:min-h-[100px]`}
+                      labelClassName="font-medium text-gray-700 dark:text-gray-600 mb-1.5"
+                      modules={{
+                        toolbar: [
+                          [{ direction: 'rtl' }],
+                          ['bold', 'italic', 'underline', 'strike'],
+                          [{ list: 'ordered' }, { list: 'bullet' }],
+                          [{ align: [] }],
+                          [{ color: [] }, { background: [] }],
+                          ['clean']
+                        ]
+                      }}
+                    />
+                    <QuillEditor
+                      value={section.contentAr}
+                      placeholder={`${text.contentAr} ${lang === 'ar'? ' رقم':'number '} ${index+1}`}
+                      onChange={(value) => {
+                        console.log("valueAr: ", value);
+                        handleSectionsChange(index, 'contentAr', value);
+                      }}
+                      className={`@3xl:col-span-2 [&>.ql-container_.ql-editor]:min-h-[100px]`}
+                      labelClassName="font-medium text-gray-700 dark:text-gray-600 mb-1.5"
+                      modules={{
+                        toolbar: [
+                          [{ direction: 'rtl' }],
+                          ['bold', 'italic', 'underline', 'strike'],
+                          [{ list: 'ordered' }, { list: 'bullet' }],
+                          [{ align: [] }],
+                          [{ color: [] }, { background: [] }],
+                          ['clean']
+                        ]
+                      }}
+                    />
                   </div>
-                    <div className="">
-                      <div className='flex flex-col md:flex-row gap-4 mb-3'>
-                        {section.image ? (
-                          <></>
-                        ) : (
-                          <label className="w-fit cursor-pointer bg-gray-100 border border-gray-300 rounded-md px-6 md:px-3 py-2 text-sm">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => handleImageUpload(e, index)}
-                            />
-                            <PiUploadSimple className="w-4 h-4 text-gray-600" />
-                          </label>
-                        )}
-                      </div>
-                      <div className="flex justify-center items-center gap-4">
-                        {section.image && (
-                          <div
-                            className="flex min-h-[58px] w-full items-center rounded-xl border border-muted px-3 dark:border-gray-300"
-                          >
-                            <div className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-muted bg-gray-50 object-cover px-2 py-1.5 dark:bg-transparent">
-                              {section.image instanceof File && section.image.type.includes('image') ? (
-                                <Image
-                                  src={URL.createObjectURL(section.image)}
-                                  fill
-                                  className="object-contain"
-                                  priority
-                                  alt={section.image.name}
-                                  sizes="(max-width: 768px) 100vw"
-                                />
-                              ) : (
-                                <span className="text-gray-400">No Image</span>
-                              )}
-                            </div>
-                            <div className="truncate px-2.5">{section.image?.name || 'No file selected'}</div>
-                            <ActionIcon
-                              onClick={() => handleRemoveImage(index)}
-                              size="sm"
-                              variant="flat"
-                              color="danger"
-                              className="ms-auto flex-shrink-0 p-0 dark:bg-red-dark/20"
-                            >
-                              <PiTrashBold className="w-6" />
-                            </ActionIcon>
-                          </div>
-                        )}
-                      </div>
+                  <div className="flex flex-col gap-4 mb-3 rtl:ltr">
+                    <QuillEditor
+                      value={section.additionalInfoEn}
+                      placeholder={`${text.additionalInfoEn} ${lang === 'ar'? ' رقم':''} ${index+1}`}
+                      onChange={(value) => {
+                        console.log("value: ", value);
+                        handleSectionsChange(index, 'additionalInfoEn', value);
+                      }}
+                      className={`@3xl:col-span-2 [&>.ql-container_.ql-editor]:min-h-[100px]`}
+                      labelClassName="font-medium text-gray-700 dark:text-gray-600 mb-1.5"
+                      modules={{
+                        toolbar: [
+                          [{ direction: 'rtl' }],
+                          ['bold', 'italic', 'underline', 'strike'],
+                          [{ list: 'ordered' }, { list: 'bullet' }],
+                          [{ align: [] }],
+                          [{ color: [] }, { background: [] }],
+                          ['clean']
+                        ]
+                      }}
+                    />
+                    <QuillEditor
+                      value={section.additionalInfoAr}
+                      placeholder={`${text.additionalInfoAr} ${lang === 'ar'? ' رقم':''} ${index+1}`}
+                      onChange={(value) => {
+                        console.log("valueAr: ", value);
+                        handleSectionsChange(index, 'additionalInfoAr', value);
+                      }}
+                      className={`@3xl:col-span-2 [&>.ql-container_.ql-editor]:min-h-[100px]`}
+                      labelClassName="font-medium text-gray-700 dark:text-gray-600 mb-1.5"
+                      modules={{
+                        toolbar: [
+                          [{ direction: 'rtl' }],
+                          ['bold', 'italic', 'underline', 'strike'],
+                          [{ list: 'ordered' }, { list: 'bullet' }],
+                          [{ align: [] }],
+                          [{ color: [] }, { background: [] }],
+                          ['clean']
+                        ]
+                      }}
+                    />
+                  </div>
+                  <div className="">
+                    <div className='flex flex-col md:flex-row gap-4 mb-3 mt-6'>
+                      {section.image ? (
+                        <></>
+                      ) : (
+                        <label className="w-fit cursor-pointer bg-gray-100 border border-gray-300 rounded-md px-6 md:px-3 py-2 text-sm">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => handleImageUpload(e, index)}
+                          />
+                          <PiUploadSimple className="w-4 h-4 text-gray-600" />
+                        </label>
+                      )}
                     </div>
+                    <div className="flex justify-center items-center gap-4">
+                      {section.image && (
+                        <div className="flex min-h-[58px] w-full items-center rounded-xl border border-muted px-3 dark:border-gray-300">
+                          <div className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border border-muted bg-gray-50 object-cover px-2 py-1.5 dark:bg-transparent">
+                            {section.image instanceof File && section.image.type.includes('image') ? (
+                              <Image
+                                src={URL.createObjectURL(section.image)}
+                                fill
+                                className="object-contain"
+                                priority
+                                alt={section.image.name}
+                                sizes="(max-width: 768px) 100vw"
+                              />
+                            ) : typeof section.image === 'string' ? (
+                              <Image
+                                src={section.image}
+                                fill
+                                className="object-contain"
+                                priority
+                                alt="Preloaded Image"
+                                sizes="(max-width: 768px) 100vw"
+                              />
+                            ) : (
+                              <span className="text-gray-400">No Image</span>
+                            )}
+                          </div>
+                          <div className="truncate px-2.5">
+                            {section.image instanceof File ? section.image.name : 'Existing Image'}
+                          </div>
+                          <ActionIcon
+                            onClick={() => handleRemoveImage(index)}
+                            size="sm"
+                            variant="flat"
+                            color="danger"
+                            className="ms-auto flex-shrink-0 p-0 dark:bg-red-dark/20"
+                          >
+                            <PiTrashBold className="w-6" />
+                          </ActionIcon>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <button
                     type="button"
                     title={`${lang === 'ar'? 'حذف':'remove'}`}

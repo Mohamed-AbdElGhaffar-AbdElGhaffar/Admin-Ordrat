@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { defaultColumns } from './column';
 import MainTable from '@/app/shared/table/main-table';
 import WidgetCard from '@components/cards/widget-card';
-import { Artical } from '@/data/tan-table-data';
+import { Article } from '@/data/tan-table-data';
 import TablePagination from '@/app/shared/table/table-pagination';
 import { useTanStackTable } from '@/app/shared/tan-table/custom-table-components/use-TanStack-Table';
 
@@ -13,9 +13,9 @@ import { PiArrowsClockwiseBold } from 'react-icons/pi';
 import TableToolbarFilter from '../table-toolbar-filter-final';
 import { useFileContext } from '@/app/components/context/FileContext';
 import axiosClient from '@/app/components/context/api';
-import ArticalAddButton from '../../articalButtom';
+import ArticleAddButton from '../../articleButtom';
 
-export default function ArticalTable({lang = "en"}:{lang?:string;}) {
+export default function ArticleTable({lang = "en"}:{lang?:string;}) {
 
   const [inputName, setInputName] = useState('');
 
@@ -30,10 +30,10 @@ export default function ArticalTable({lang = "en"}:{lang?:string;}) {
     { value: 20, label: '20' },
   ];
 
-  const [defaultData, setDefaultData] = useState<Artical[]>([]);
-  const { updateArtical, setUpdateArtical } = useFileContext();
+  const [defaultData, setDefaultData] = useState<Article[]>([]);
+  const { updateArticle, setUpdateArticle } = useFileContext();
   
-  const { table, setData } = useTanStackTable<Artical>({
+  const { table, setData } = useTanStackTable<Article>({
     tableData: defaultData,
     columnConfig: defaultColumns(lang),
     options: {
@@ -75,7 +75,7 @@ export default function ArticalTable({lang = "en"}:{lang?:string;}) {
     },
   });
 
-  const fetchArtical = async () => {
+  const fetchArticle = async () => {
     const queryParams = new URLSearchParams({
       name: inputName,
       PageNumber: (pageIndex + 1).toString(),
@@ -120,42 +120,42 @@ export default function ArticalTable({lang = "en"}:{lang?:string;}) {
   };  
 
   useEffect(() => {
-    fetchArtical();
+    fetchArticle();
   }, [setData, lang]); 
 
   useEffect(() => {
-    if (updateArtical == true) {
+    if (updateArticle == true) {
       handleRefreshData();
-      setUpdateArtical(false);
+      setUpdateArticle(false);
     }
-  }, [updateArtical]); 
+  }, [updateArticle]); 
 
   const handleRefreshData = () => {
-    fetchArtical();
+    fetchArticle();
   };
 
   return (
     <>
-      <WidgetCard title={lang === 'ar' ? 'جدول المقالات' : 'Articals Table'} className="flex flex-col gap-4">
+      <WidgetCard title={lang === 'ar' ? 'جدول المقالات' : 'Articles Table'} className="flex flex-col gap-4">
         <div className="flex justify-end items-center">
             <Button onClick={handleRefreshData} className="me-2 sm:me-6">
               <PiArrowsClockwiseBold className="me-0 sm:me-1.5 h-[17px] w-[17px]" />
               <span className='hidden sm:block'>{lang == "en"?"Update Data":'تحديث البيانات'}</span>
             </Button>
-            <ArticalAddButton lang={lang} buttonLabel={lang === 'ar' ? "إضافة المقالة" : "Add Artical"}  onSuccess={handleRefreshData} /> 
+            <ArticleAddButton lang={lang} buttonLabel={lang === 'ar' ? "إضافة المقالة" : "Add Article"}  onSuccess={handleRefreshData} /> 
         </div>
         <TableToolbarFilter
-          nameEN="Artical" 
+          nameEN="Article" 
           nameAr="المقالة" 
           table={table}
           lang={lang}
           search={inputName}
           setSearch={setInputName}
           filters={[]}
-          onSuccess={()=>setUpdateArtical(true)}
+          onSuccess={()=>setUpdateArticle(true)}
         />
         <MainTable table={table} variant={'modern'} lang={lang} />
-        <TablePagination options={options} table={table} lang={lang} pageIndex={pageIndex} totalPages={totalPages} setPageIndex={setPageIndex} setPageSize={setPageSize} setUpdate={setUpdateArtical} />
+        <TablePagination options={options} table={table} lang={lang} pageIndex={pageIndex} totalPages={totalPages} setPageIndex={setPageIndex} setPageSize={setPageSize} setUpdate={setUpdateArticle} />
       </WidgetCard>
     </>
   );
